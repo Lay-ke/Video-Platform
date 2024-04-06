@@ -5,3 +5,9 @@ const app = express();
 app.set('view engine', 'ejs')
 
 app.listen(3000)
+
+app.use(express.static('public'))
+
+app.get('/signin', (req, res) => {
+    res.render('signin')
+})
