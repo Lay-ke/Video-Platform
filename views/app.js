@@ -11,6 +11,7 @@ const dbURI = 'mongodb+srv://node-usr:Grook1_1.@node-tuts.2kjewxh.mongodb.net/Vi
 mongoose.connect(dbURI)
     .then((result) => {
         //server is listening
+        console.log('DB Connected')
         app.listen(3000)
     })
     .catch((err) => console.log(err))

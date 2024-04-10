@@ -1,4 +1,22 @@
-const User = require('../models/user')
+const User = require('../models/user');
+
+//Handle error
+const handleError = (err) => {
+    let errors = {email: '', password: ''};
+
+    // checking validation
+    if (err.message.includes('user validation failed')) {
+        Object.values(err.errors).forEach(error => {
+            errors[error.properties.path] = error.properties.message;
+        });
+    };
+    // duplicate key 
+    if (err.code === 11000) {
+        errors['email'] = "Email already registered! ";
+    };
+    
+    return errors;
+};
 
 module.exports.signup_get = (req, res) => {
     res.render('signup');
@@ -14,10 +32,12 @@ module.exports.signup_post = async (req, res) => {
     
     try {
         const user = await User.create({email, password})
-        res.status(201).json('SignUp Success', user)
-    } catch (error) {
-        res.status(400).send('Error something failed')
-    }
+        res.status(201).json(user);
+    } catch (err) {
+        console.log(err.message, err.code)
+        const errors = handleError(err)
+        res.status(400).json({"errors": errors})
+    };
 };
 
 module.exports.signin_post = async (req, res) => {
