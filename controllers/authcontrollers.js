@@ -1,4 +1,5 @@
 const User = require('../models/user');
+const jwt = require('jsonwebtoken');
 
 //Handle error
 const handleError = (err) => {
@@ -18,6 +19,19 @@ const handleError = (err) => {
     return errors;
 };
 
+const maxAge = 1 * 24 * 60 * 60;
+
+//jwt function
+const createToken = (id) => {
+    return jwt.sign({id}, 'Amalitech Webby Tokes', {
+        expiresIn: maxAge
+    });
+}
+
+module.exports.home = (req, res) => {
+    res.render('Home');
+};
+
 module.exports.signup_get = (req, res) => {
     res.render('signup');
 };
@@ -32,7 +46,9 @@ module.exports.signup_post = async (req, res) => {
     
     try {
         const user = await User.create({email, password})
-        res.status(201).json(user);
+        const token = createToken(user._id) //creating token
+        res.cookie('jwt', token, {httpOnly: true, maxAge: maxAge * 1000 });  //setting jwt cookie
+        res.status(201).json({"user": user._id});
     } catch (err) {
         console.log(err.message, err.code)
         const errors = handleError(err)
