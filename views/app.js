@@ -1,9 +1,16 @@
 const express = require('express');
 const mongoose = require('mongoose')
 const authRoutes = require('../routes/authRoutes');
+const cookieParser = require('cookie-parser')
+const { requireAuth } = require('../middleware/authMiddleware')
 const { db } = require('../models/user');
 
 const app = express();
+
+//Middleware 
+app.use(express.static('public'));
+app.use(express.json());
+app.use(cookieParser());
 
 app.set('view engine', 'ejs')
 
@@ -16,9 +23,7 @@ mongoose.connect(dbURI)
     })
     .catch((err) => console.log(err))
 
-//Middleware 
-app.use(express.static('public'))
-app.use(express.json())
+
 
 //Authentication Routes
 app.use(authRoutes)

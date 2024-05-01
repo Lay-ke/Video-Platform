@@ -3,9 +3,60 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=
     , initial-scale=1.0">
-    <title>Document</title>
+    <title>Sign In</title>
+    <link rel="stylesheet" href="css/style2.css">
 </head>
 <body>
-    <h2>SIgnIN</h2>
+    <div class="container">
+        <h2>Sign IN</h2>
+        <form action="#">
+            <div class="form-group">
+                <label for="email">Email:</label>
+                <input type="email" id="email" name="email" placeholder="Enter your email" required>
+                <div class="email error"></div>
+            </div>
+            <div class="form-group">
+                <label for="password">Password:</label>
+                <input type="password" id="password" name="password" placeholder="Enter your password" required>
+                <div class="password error"></div>
+            </div>
+            <button type="submit">Sign In</button>
+        </form>
+    </div>
+
+    <script>
+        const form = document.querySelector('form');
+        const emailError = document.querySelector('.email.error')
+        const passwordError = document.querySelector('.password.error')
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            //get form values
+            const email = form.email.value;
+            const password = form.password.value;
+
+            try {
+                const res = await fetch('/signin', {
+                    method: 'POST',
+                    body: JSON.stringify({email: email, password: password}),
+                    headers: {'Content-Type': 'application/json'}
+                })
+                const data = await res.json()
+                console.log(data)
+                
+                //displaying validation error
+                if (data.errors) {
+                    emailError.textContent = data.errors.email;
+                    passwordError.textContent = data.errors.password;
+                }
+                if (data.user) {
+                    location.assign('/')
+                }
+            } catch (error) {
+                console.log(error)
+            }
+        } )
+    </script>
 </body>
 </html>
