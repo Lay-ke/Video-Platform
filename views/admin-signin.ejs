@@ -1,6 +1,6 @@
 <%- include('./partials/header') %>
     <div class="s-container">
-        <h2>Sign Up</h2>
+        <h2>Admin Sign IN</h2>
         <form action="#">
             <div class="form-group">
                 <label for="email">Email:</label>
@@ -12,7 +12,7 @@
                 <input type="password" id="password" name="password" placeholder="Enter your password" required>
                 <div class="password error"></div>
             </div>
-            <button type="submit">Sign Up</button>
+            <button type="submit">Sign In</button>
         </form>
     </div>
 
@@ -29,7 +29,7 @@
             const password = form.password.value;
 
             try {
-                const res = await fetch('/signup', {
+                const res = await fetch('/admin-signin', {
                     method: 'POST',
                     body: JSON.stringify({email: email, password: password}),
                     headers: {'Content-Type': 'application/json'}
@@ -42,8 +42,8 @@
                     emailError.textContent = data.errors.email;
                     passwordError.textContent = data.errors.password;
                 }
-                if (data.user) {
-                    location.assign('/')
+                if (data.admin) {
+                    location.assign('/admin-home')
                 }
             } catch (error) {
                 console.log(error)

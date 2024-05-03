@@ -3,7 +3,7 @@ const mongoose = require('mongoose')
 const authRoutes = require('../routes/authRoutes');
 const cookieParser = require('cookie-parser')
 const { requireAuth } = require('../middleware/authMiddleware')
-const { db } = require('../models/user');
+
 
 const app = express();
 
@@ -23,7 +23,7 @@ mongoose.connect(dbURI)
     })
     .catch((err) => console.log(err))
 
-
+    
 
 //Authentication Routes
 app.use(authRoutes)

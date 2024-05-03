@@ -39,8 +39,45 @@ userSchema.statics.signin = async function(email, password) {
     throw Error('Incorrect email');
 }
 
+
+// admin schema
+const adminSchema = new Schema({
+    "email" : {
+        type: String,
+        required : [true, "Email is required"],
+        unique: true,
+        lowercase: true,
+        validate: [isEmail, "Enter a valid email"]
+    },
+    "password" : {
+        type: String,
+        required: [true, "Password is required"],
+        minlength: [8, "Password should contain 8 or more characters"]
+    }
+});
+
+// prehook to hash admin password
+adminSchema.pre('save', async function(next) {
+    const salt = await bcrypt.genSalt();
+    this.password = await bcrypt.hash(this.password, salt);
+});
+
+// admin signin function
+adminSchema.statics.signin = async function(email, password) {
+    const admin = await this.findOne({email });
+    if (admin) {
+        passwd_auth = await bcrypt.compare(password, admin.password);
+        if (passwd_auth) {
+            return admin;
+        }
+        throw Error('Incorrect password');
+    }
+    throw Error('Incorrect email');
+}
+
 const User = mongoose.model('user', userSchema);
+const Admin = mongoose.model('admin', adminSchema);
 
 
 
-module.exports = User
+module.exports = {User, Admin};
