@@ -73,11 +73,37 @@ adminSchema.statics.signin = async function(email, password) {
         throw Error('Incorrect password');
     }
     throw Error('Incorrect email');
-}
+};
+
+// video schema
+const videoSchema = new Schema({
+    "videoKey": {
+        type: String,
+        required: true,
+        unique: true,
+    },
+    "title": {
+        type: String
+    },
+    "adminID": {
+        type: String,
+        required: true
+    },
+    "uploadDate": {
+        type: Date,
+        default: Date.now
+    },
+    "url": {
+        type: String
+    }
+});
+
+
 
 const User = mongoose.model('user', userSchema);
 const Admin = mongoose.model('admin', adminSchema);
+const Video = mongoose.model('video', videoSchema);
 
 
 
-module.exports = {User, Admin};
+module.exports = {User, Admin, Video};
