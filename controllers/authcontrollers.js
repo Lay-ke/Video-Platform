@@ -4,7 +4,7 @@ const { S3Client, GetObjectCommand, PutObjectCommand, HeadObjectCommand } = requ
 const {getSignedUrl} = require('@aws-sdk/s3-request-presigner');
 const generateUniqueId = require('generate-unique-id');
 const createAWSStream = require('../middleware/index');
-require('dotenv').config()
+require('dotenv').config();
 
 //Handle error
 const handleError = (err) => {
@@ -94,16 +94,17 @@ const getObjectFileSize = async (Key) => {
 //   })
 
 module.exports.stream_get = async (req, res) => {
+    const Key = req.params.streamKey;
     const range = req.headers.range;
     console.log('>>>>>>>>>>>>>>',range)
     if (!range) {
         res.status(400).send("Request Range header")
     }
     
-    const videoSize = await getObjectFileSize('r6dfg50nt2qz275926m05gkfwb1wj7e8');
+    const videoSize = await getObjectFileSize(Key);
     
 
-    const chunkSize = 1453723;
+    const chunkSize = videoSize;
     const start = Number(range.replace(/\D/g, ''));
     const end = Math.min(start + chunkSize, videoSize - 1);
 
@@ -117,13 +118,16 @@ module.exports.stream_get = async (req, res) => {
 
     res.writeHead(206,headers);
     
-    const stream = await createAWSStream()
+    const stream = await createAWSStream(Key)
 
     stream.pipe(res)
 }
 
 module.exports.video_get = async (req, res) => {
-    
+    const Key = req.params.videoKey;
+    const video = await Video.findOne({videoKey: Key});
+    console.log(video);
+    res.render('videoplayer', {title: 'Player', video: video})
 };
 
 module.exports.video_post = async (req, res) => {
@@ -138,7 +142,8 @@ module.exports.video_post = async (req, res) => {
         // database data
         const data = {
             "videoKey": video_key,
-            "title": req.body.name,
+            "title": req.body.title,
+            "description": req.body.description,
             "adminID": currAdmin.id,
             "uploadDate": new Date()
         };
@@ -169,8 +174,10 @@ module.exports.video_post = async (req, res) => {
     }
 };
 
-module.exports.home = (req, res) => {
-    res.render('Home', {title: "Home"});
+module.exports.home = async (req, res) => {
+    const videos = await getVideos();
+    // console.log(videos)
+    res.render('Home', {title: "Home",videos: videos});
 };
 
 module.exports.signup_get = (req, res) => {

@@ -5,7 +5,7 @@
       <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavDropdown" aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
       </button>
-      <div class="collapse navbar-collapse" id="navbarNavDropdown">
+      <div class="collapse navbar-collapse justify-content-end" id="navbarNavDropdown">
         <ul class="navbar-nav">
           <li class="nav-item">
             <a class="nav-link active" aria-current="page" href="#">Home</a>
@@ -38,8 +38,8 @@
         </div>
         <form action="">
             <div class="mb-3">
-                <label for="name" class="form-label">Name</label>
-                <input type="text" class="form-control" name="name" id="name" placeholder="Name">
+                <label for="title" class="form-label">Title</label>
+                <input type="text" class="form-control" name="title" id="title" placeholder="Name">
             </div>
             <div class="mb-3">
                 <label for="description" class="form-label">Description</label>
@@ -62,7 +62,8 @@
 
             // Create FormData object
             const formData = new FormData();
-            formData.append('name', form.name.value);
+            formData.append('title', form.title.value);
+            formData.append('description', form.description.value)
             formData.append('video', form.video.files[0]); // Access file using files[0]
 
             try {
@@ -72,7 +73,6 @@
                 });
                 const data = await res.json();
                 if (data.jwt) {
-                    console.log('worked')
                     location.assign('/admin-signin')
                 }
             } catch (error) {

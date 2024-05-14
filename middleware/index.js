@@ -3,11 +3,11 @@ const SmartStream = require('./smart-stream');
 const AWS = require('aws-sdk')
 require('dotenv').config()
 
-async function createAWSStream() {
+async function createAWSStream(Key) {
     return new Promise((resolve, reject) => {
         const bucketParams = {
             Bucket: process.env.BUCKET_NAME,
-            Key: 'r6dfg50nt2qz275926m05gkfwb1wj7e8'
+            Key: Key
         };
 
         try {

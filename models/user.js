@@ -85,6 +85,9 @@ const videoSchema = new Schema({
     "title": {
         type: String
     },
+    "description": {
+        type: String
+    },
     "adminID": {
         type: String,
         required: true

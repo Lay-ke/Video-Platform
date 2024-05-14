@@ -1,5 +1,5 @@
 <%- include('./partials/header') %>
-  <nav class="navbar navbar-expand-lg bg-light">
+<nav class="navbar navbar-expand-lg bg-light">
     <div class="container-fluid">
       <a class="navbar-brand" href="#">VideoKAT</a>
       <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavDropdown" aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
@@ -32,37 +32,9 @@
     </div>
   </nav>
   <div class="container">
-    <h2>Welcome @Name</h2>
-  </div>
-  <div class="container">
+    <div>Movie Title</div>
     <div>
-      <h3>Recent Uploads</h3>
+        <video id="vid-Box" width="700" controls autoplay src="/stream/<%= video.videoKey %>"></video>
     </div>
-    <div class="row row-cols-3 row-cols-md-3 g-3">
-      <% if (videos.length > 0) { %>
-        <% videos.forEach(video => { %>
-          <div >
-            <div class="card" style="width: 20rem;">
-              <img src="https://p10grp.com/wp-content/uploads/2020/03/video.png" height="250" class="card-img-top" alt="thumbnail">
-              <div class="card-body">
-                <h5 class="card-title"><%= video.title %></h5>
-                <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
-                <a href="/video/<%= video.videoKey %>" class="btn btn-primary">Watch</a>
-              </div>
-            </div>
-          </div>
-        <% }) %>
-      <% } else { %>
-       <p>Sorry No Uploads yet :(  </p>
-      <% } %>
-    </div>
-
-      
   </div>
-      <!-- <video id="vid-Box" width="700" controls autoplay src="/stream"></video> -->
-      <script>
-
-      </script>
-  
-  
 <%- include('./partials/footer') %>

@@ -2,9 +2,7 @@ const express = require('express');
 const mongoose = require('mongoose');
 const authRoutes = require('../routes/authRoutes');
 const cookieParser = require('cookie-parser');
-const createAWSStream = require('../middleware/index');
-const S3Client = require('../aws-functions/streamvid')
-const AWS = require('aws-sdk')
+require('aws-sdk/lib/maintenance_mode_message').suppress = true;
 require('dotenv').config()
 
 
@@ -14,7 +12,7 @@ const app = express();
 app.set('view engine', 'ejs');
 
 //Middleware 
-app.use(express.static('public'));
+app.use(express.static(__dirname + './public'));
 // app.use(express.urlencoded())  //body parser
 app.use(express.json());
 app.use(cookieParser());
