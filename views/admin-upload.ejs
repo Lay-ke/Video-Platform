@@ -1,0 +1,64 @@
+<%- include('./partials/header') %>
+  <%- include('./partials/nav') %>
+    <div id="success-alert" style="display: none;" class="alert alert-success alert-dismissible fade show" role="alert">
+        Form submitted successfully!
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    <h2>Admin</h2>
+    <div class="s-container">
+        <div>
+            <h2>Upload Video</h2>
+        </div>
+        <form action="">
+            <div class="mb-3">
+                <label for="title" class="form-label">Title</label>
+                <input type="text" class="form-control" name="title" id="title" placeholder="Name" required>
+            </div>
+            <div class="mb-3">
+                <label for="description" class="form-label">Description</label>
+                <textarea class="form-control" name="description" id="description" rows="3"></textarea>
+              </div>
+            <div class="mb-3">
+                <label for="formFile" class="form-label">Choose video</label>
+                <input class="form-control" type="file" name="video" id="formFile" required>
+              </div>
+            <!-- <input type="file" name="video" accept="video/*" id=""> -->
+            <button type="submit">Submit</button>
+        </form>
+    </div>
+
+    <script>
+        const form = document.querySelector('form');
+        const successAlert = document.getElementById('success-alert');
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            // Create FormData object
+            const formData = new FormData();
+            formData.append('title', form.title.value);
+            formData.append('description', form.description.value)
+            formData.append('video', form.video.files[0]); // Access file using files[0]
+
+            try {
+                const res = await fetch('/video', {
+                    method: 'POST',
+                    body: formData, // Pass FormData object directly
+                });
+                const data = await res.json();
+                if (data.video) {
+                    // Show success alert
+                    successAlert.style.display = 'block';
+
+                    // Optional: Reset form after successful submission
+                    form.reset();
+                }
+                if (data.jwt) {
+                    location.assign('/admin-signin')
+                }
+            } catch (error) {
+                console.log(error)
+            }
+        } )
+    </script>
+<%- include('./partials/footer') %>

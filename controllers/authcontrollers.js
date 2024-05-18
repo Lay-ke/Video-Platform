@@ -3,7 +3,7 @@ const jwt = require('jsonwebtoken');
 const { S3Client, GetObjectCommand, PutObjectCommand, HeadObjectCommand } = require("@aws-sdk/client-s3");
 const {getSignedUrl} = require('@aws-sdk/s3-request-presigner');
 const generateUniqueId = require('generate-unique-id');
-const createAWSStream = require('../middleware/index');
+const createAWSStream = require('../streamer/index');
 require('dotenv').config();
 
 //Handle error
@@ -51,6 +51,8 @@ const getVideos = async () => {
             const command = new GetObjectCommand(params);
             const url = await getSignedUrl(s3, command);
             video.url = url;
+            const adminData = await Admin.findById(video.adminID);
+            video.adminID = adminData.email;
         }
     return videos;
 }
@@ -85,14 +87,6 @@ const getObjectFileSize = async (Key) => {
     return ContentLength
   };
 
-//   getObjectFileSize('r6dfg50nt2qz275926m05gkfwb1wj7e8')
-//   .then ((result) => {
-//     console.log(result)
-//   })
-//   .catch((err) => {
-//     console.log(err)
-//   })
-
 module.exports.stream_get = async (req, res) => {
     const Key = req.params.streamKey;
     const range = req.headers.range;
@@ -123,11 +117,14 @@ module.exports.stream_get = async (req, res) => {
     stream.pipe(res)
 }
 
-module.exports.video_get = async (req, res) => {
-    const Key = req.params.videoKey;
-    const video = await Video.findOne({videoKey: Key});
-    console.log(video);
-    res.render('videoplayer', {title: 'Player', video: video})
+module.exports.videos_get = async (req, res) =>{
+    const videos = await getVideos();
+
+    res.json({videos: videos});
+}
+
+module.exports.video_player_get = async (req, res) => {
+    res.render('videoplayer', {title: 'Player'});
 };
 
 module.exports.video_post = async (req, res) => {
@@ -164,7 +161,7 @@ module.exports.video_post = async (req, res) => {
                 const command = new PutObjectCommand(params);
                 await s3.send(command);
             }
-            res.json(video)
+            res.json({video: video});
         } catch (err) {
             console.log("Check error here: ",err)
             res.json(err)
@@ -173,6 +170,21 @@ module.exports.video_post = async (req, res) => {
         res.json({'jwt': 'jwtError'})
     }
 };
+
+module.exports.video_share = async (req, res) => {
+    const videoKey = req.params.videoKey;
+    try {
+        const video = await Video.findOne({videoKey: videoKey});
+        res.render('videoshare', {title: 'Video', video: video})
+    } catch (err) {
+        res.render('_404.ejs')
+        console.log(err)
+    }
+}
+
+module.exports.video_delete = (req, res) => {
+
+}
 
 module.exports.home = async (req, res) => {
     const videos = await getVideos();
@@ -222,9 +234,14 @@ module.exports.signin_post = async (req, res) => {
     }
 };
 
-module.exports.admin_home_get = (req, res) => {
-    res.render('admin-home', {title: "Admin"})
+module.exports.admin_home_get = async (req, res) => {
+    const videos = await getVideos();
+    res.render('admin-home', {title: "Admin", videos: videos});
 };
+
+module.exports.admin_upload_get = (req, res) => {
+    res.render('admin-upload', {title: 'Admin | Upload'})
+}
 
 module.exports.admin_signin_get = async (req, res) => {
     // const email = 'admin@gmail.com';
@@ -250,7 +267,7 @@ module.exports.admin_signin_post = async (req, res) => {
 };
 
 module.exports.admin_logout_get =(req, res) => {
-    // res.cookie('jwt', '', {maxAge: 1})
+    res.cookie('jwt', '', {maxAge: 1, httpOnly: true});
     res.redirect('/admin-signin');
 };
 
@@ -259,3 +276,93 @@ module.exports.logout_get = (req, res) => {
     res.redirect('/signin');
 };
 
+module.exports.forget_password_get = (req, res) => {
+
+}
+
+module.exports.forget_password_post = async (req, res) => {
+    const { email } = req.body;
+    try {
+        const oldUser = await User.findOne({ email });
+        if (!oldUser) {
+        return res.json({ status: "User Not Exists!!" });
+        }
+        const secret = JWT_SECRET + oldUser.password;
+        const token = jwt.sign({ email: oldUser.email, id: oldUser._id }, secret, {
+        expiresIn: "5m",
+        });
+        const link = `http://localhost:5000/reset-password/${oldUser._id}/${token}`;
+        var transporter = nodemailer.createTransport({
+        service: "gmail",
+        auth: {
+            user: "adarsh438tcsckandivali@gmail.com",
+            pass: "rmdklolcsmswvyfw",
+        },
+        });
+        var mailOptions = {
+            from: "youremail@gmail.com",
+            to: "thedebugarena@gmail.com",
+            subject: "Password Reset",
+            text: link,
+          };
+      
+          transporter.sendMail(mailOptions, function (error, info) {
+            if (error) {
+              console.log(error);
+            } else {
+              console.log("Email sent: " + info.response);
+            }
+          });
+          console.log(link);
+    }
+    catch (err) {
+
+    }
+}
+
+module.exports.reset_password_get = async (req, res) => {
+    const { id, token } = req.params;
+  console.log(req.params);
+  const oldUser = await User.findOne({ _id: id });
+  if (!oldUser) {
+    return res.json({ status: "User Not Exists!!" });
+  }
+  const secret = JWT_SECRET + oldUser.password;
+  try {
+    const verify = jwt.verify(token, secret);
+    res.render("index", { email: verify.email, status: "Not Verified" });
+  } catch (error) {
+    console.log(error);
+    res.send("Not Verified");
+  }
+}
+
+module.exports.reset_password_post = async (req, res) => {
+    const { id, token } = req.params;
+    const { password } = req.body;
+
+    const oldUser = await User.findOne({ _id: id });
+    if (!oldUser) {
+        return res.json({ status: "User Not Exists!!" });
+    }
+    const secret = JWT_SECRET + oldUser.password;
+    try {
+        const verify = jwt.verify(token, secret);
+        const encryptedPassword = await bcrypt.hash(password, 10);
+        await User.updateOne(
+        {
+            _id: id,
+        },
+        {
+            $set: {
+            password: encryptedPassword,
+            },
+        }
+        );
+
+        res.render("index", { email: verify.email, status: "verified" });
+    } catch (error) {
+        console.log(error);
+        res.json({ status: "Something Went Wrong" });
+    }
+}

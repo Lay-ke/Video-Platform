@@ -1,40 +1,96 @@
 <%- include('./partials/header') %>
-<nav class="navbar navbar-expand-lg bg-light">
-    <div class="container-fluid">
-      <a class="navbar-brand" href="#">VideoKAT</a>
-      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavDropdown" aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
-        <span class="navbar-toggler-icon"></span>
-      </button>
-      <div class="collapse navbar-collapse justify-content-end" id="navbarNavDropdown">
-        <ul class="navbar-nav ">
-          <li class="nav-item">
-            <a class="nav-link active" aria-current="page" href="#">Home</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="#">About</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="#">Contact</a>
-          </li>
-          <li class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-              Link
-            </a>
-            <ul class="dropdown-menu">
-              <li><a class="dropdown-item" href="#">Action</a></li>
-              <li><a class="dropdown-item" href="#">Another action</a></li>
-              <li><hr class="dropdown-divider"></li>
-              <li><a class="dropdown-item" href="#">Something else here</a></li>
-            </ul>
-          </li>
-        </ul>
+  <%- include('./partials/nav') %>
+  <div class="container">
+    <div>
+      <h3>Now Playing: <div class="video-title"></div></h3>
+    </div>
+    <div>
+      <video id="video-player" width="700" controls autoplay  src=""></video>
+    </div>
+    <br>
+    <div class="card w-50" style="width: 25rem;">
+      <div class="card-body">
+        <h5 class="card-title video-title"></h5>
+        <h6 class="card-subtitle mb-2 text-muted">Description</h6>
+        <p id="video-description" class="card-text"></p>
+        <a href="#" class="card-link">Share</a>
+        <a href="#" class="card-link">Download</a>
       </div>
     </div>
-  </nav>
-  <div class="container">
-    <div>Movie Title</div>
-    <div>
-        <video id="vid-Box" width="700" controls autoplay src="/stream/<%= video.videoKey %>"></video>
-    </div>
+    <button id="prev-btn" disabled>Prev</button>
+    <button id="next-btn">Next</button>
   </div>
+
+  <script>
+    let videos = []; // Array to store video objects
+    let currentVideoIndex = 0;
+    const videoTitle = document.querySelectorAll('.video-title');
+    const videoDescription = document.getElementById('video-description');
+    const videoPlayer = document.getElementById('video-player');
+    const prevBtn = document.getElementById('prev-btn');
+    const nextBtn = document.getElementById('next-btn');
+
+    // Function to fetch video URLs from the server
+    async function fetchVideos() {
+      try {
+        const response = await fetch('/videos'); // Replace '/videos' with your API endpoint
+        if (response.ok) {
+          const data = await response.json();
+          for (const video of data.videos) {    // Looping to get each video object
+            videos.push(video)
+          };
+ 
+          displayCurrentVideo();
+          prevBtn.disabled = true; // Disable prev button initially since we're at the first video
+        } else {
+          console.error('Failed to fetch videos:', response.statusText);
+        }
+      } catch (error) {
+        console.error('Error fetching videos:', error);
+      }
+    }
+
+    // Function to display current video
+    function displayCurrentVideo() {
+      const currentVideo = videos[currentVideoIndex];     //Retrieving object based on the currentVideoIndex
+      videoPlayer.src = `/stream/${currentVideo.videoKey}`;
+      videoPlayer.load();    // Reload the video element to reflect the new source
+      videoDescription.textContent = currentVideo.description;
+      videoTitle.forEach(element => {
+        element.textContent = currentVideo.title; // Update the text content of each element with the class 'video-title'
+      });
+    }
+
+    // Function to handle next button click
+    function nextVideo() {
+      if (currentVideoIndex < videos.length - 1) {
+        currentVideoIndex++;
+        displayCurrentVideo();
+        prevBtn.disabled = false; // Enable prev button since we're not at the beginning
+      }
+      if (currentVideoIndex === videos.length - 1) {
+        nextBtn.disabled = true; // Disable next button when we reach the last video
+      }
+    }
+
+    // Function to handle prev button click
+    function prevVideo() {
+      if (currentVideoIndex > 0) {
+        currentVideoIndex--;
+        displayCurrentVideo();
+        nextBtn.disabled = false; // Enable next button since we're not at the end
+      }
+      if (currentVideoIndex === 0) {
+        prevBtn.disabled = true; // Disable prev button when we're at the first video
+      }
+    }
+
+    // Event listeners for next and prev buttons
+    nextBtn.addEventListener('click', nextVideo);
+    prevBtn.addEventListener('click', prevVideo);
+
+    // Fetch videos when the page loads
+    fetchVideos();
+
+  </script>
 <%- include('./partials/footer') %>

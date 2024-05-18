@@ -1,83 +1,40 @@
 <%- include('./partials/header') %>
-<nav class="navbar navbar-expand-lg bg-light">
-    <div class="container-fluid">
-      <a class="navbar-brand" href="#">VideoKAT</a>
-      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavDropdown" aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
-        <span class="navbar-toggler-icon"></span>
-      </button>
-      <div class="collapse navbar-collapse justify-content-end" id="navbarNavDropdown">
-        <ul class="navbar-nav">
-          <li class="nav-item">
-            <a class="nav-link active" aria-current="page" href="#">Home</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="#">About</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="#">Contact</a>
-          </li>
-          <li class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-              Link
-            </a>
-            <ul class="dropdown-menu">
-              <li><a class="dropdown-item" href="#">Action</a></li>
-              <li><a class="dropdown-item" href="#">Another action</a></li>
-              <li><hr class="dropdown-divider"></li>
-              <li><a class="dropdown-item" href="#">Something else here</a></li>
-            </ul>
-          </li>
-        </ul>
-      </div>
-    </div>
-  </nav>
+  <%- include('./partials/nav') %>
+  <div class="container">
+    <h2>Welcome @Name</h2>
+  </div>
+  <div class="container">
     <h2>Admin</h2>
-    <div class="s-container">
-        <div>
-            <h2>Upload Video</h2>
-        </div>
-        <form action="">
-            <div class="mb-3">
-                <label for="title" class="form-label">Title</label>
-                <input type="text" class="form-control" name="title" id="title" placeholder="Name">
+    <div>
+      <h3>Uploads</h3>
+    </div>
+    <div class="row row-cols-3 row-cols-md-3 g-3">
+      <% if (videos.length > 0) { %>
+        <% videos.forEach(video => { %>
+          <div >
+            <div class="card" style="width: 20rem;">
+              <img src="https://p10grp.com/wp-content/uploads/2020/03/video.png" height="250" class="card-img-top" alt="thumbnail">
+              <hr class="w-4">
+              <div class="card-body">
+                <h5 class="card-title"><%= video.title %></h5>
+                <h6>Upload By: <%= video.adminID %></h6>
+                <!-- <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p> -->
+                <a href="/video/player" class="btn btn-primary">Watch</a>
+                <a href="/video/delete" class="btn btn-primary">Delete</a>
+              </div>
             </div>
-            <div class="mb-3">
-                <label for="description" class="form-label">Description</label>
-                <textarea class="form-control" name="description" id="description" rows="3"></textarea>
-              </div>
-            <div class="mb-3">
-                <label for="formFile" class="form-label">Choose video</label>
-                <input class="form-control" type="file" name="video" id="formFile">
-              </div>
-            <!-- <input type="file" name="video" accept="video/*" id=""> -->
-            <button type="submit">Submit</button>
-        </form>
+          </div>
+        <% }) %>
+      <% } else { %>
+       <p>Sorry No Uploads yet :(  </p>
+      <% } %>
     </div>
 
-    <script>
-        const form = document.querySelector('form');
+      
+  </div>
+      <script>
 
-        form.addEventListener('submit', async (e) => {
-            e.preventDefault();
-
-            // Create FormData object
-            const formData = new FormData();
-            formData.append('title', form.title.value);
-            formData.append('description', form.description.value)
-            formData.append('video', form.video.files[0]); // Access file using files[0]
-
-            try {
-                const res = await fetch('/video', {
-                    method: 'POST',
-                    body: formData, // Pass FormData object directly
-                });
-                const data = await res.json();
-                if (data.jwt) {
-                    location.assign('/admin-signin')
-                }
-            } catch (error) {
-                console.log(error)
-            }
-        } )
-    </script>
+      </script>
+  
+  
 <%- include('./partials/footer') %>

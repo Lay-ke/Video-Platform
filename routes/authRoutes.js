@@ -15,12 +15,24 @@ router.get('/signin', authController.signin_get);
 router.post('/signin', authController.signin_post);
 router.get('/signup', authController.signup_get);
 router.post('/signup', authController.signup_post);
+router.get('/logout', authController.logout_get);   // user logout
+router.get('/video/player', authController.video_player_get);   // users video player
+
+// Admin
 router.get('/admin-signin', authController.admin_signin_get);
 router.post('/admin-signin', authController.admin_signin_post);
 router.get('/admin-home',requireAuthAdmin, authController.admin_home_get); //add requireauth
-router.get('/admin/logout', authController.admin_logout_get)
-router.get('/logout', authController.logout_get);
-router.get('/video/:videoKey', authController.video_get);
-router.post('/video', upload.single('video'), authController.video_post);
+router.get('/admin-upload', authController.admin_upload_get);   // admin upload page route
+router.get('/admin/logout', authController.admin_logout_get);
+
+router.get('/video-share/:videoKey', authController.video_share);
+router.delete('/video/delete', authController.video_delete);
+router.get('/videos', authController.videos_get);   // get allvvideos
+router.post('/video', upload.single('video'), authController.video_post);    // admin video upload route
+
+router.get('/forget-password', authController.forget_password_get)
+router.post('/forget-password', authController.forget_password_post)
+router.get('/reset-password/:id/:token', authController.reset_password_get);
+router.post('/reset-password/:id/:token', authController.reset_password_post);
 
 module.exports = router
