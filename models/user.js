@@ -39,6 +39,12 @@ userSchema.statics.signin = async function(email, password) {
     throw Error('Incorrect email');
 }
 
+userSchema.statics.resetPassword = async function(password) {
+    const salt = await bcrypt.genSalt();
+    password = await bcrypt.hash(password,salt);
+    return password;
+}
+
 
 // admin schema
 const adminSchema = new Schema({

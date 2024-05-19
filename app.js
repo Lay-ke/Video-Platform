@@ -13,7 +13,7 @@ app.set('view engine', 'ejs');
 
 //Middleware 
 app.use(express.static('public'));
-// app.use(express.urlencoded())  //body parser
+app.use(express.urlencoded({extended: false}))  //body parser
 app.use(express.json());
 app.use(cookieParser());
 

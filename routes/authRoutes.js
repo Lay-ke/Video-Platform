@@ -26,7 +26,7 @@ router.get('/admin-upload', authController.admin_upload_get);   // admin upload 
 router.get('/admin/logout', authController.admin_logout_get);
 
 router.get('/video-share/:videoKey', authController.video_share);
-router.delete('/video/delete', authController.video_delete);
+router.delete('/video/:deleteKey', authController.video_delete);
 router.get('/videos', authController.videos_get);   // get allvvideos
 router.post('/video', upload.single('video'), authController.video_post);    // admin video upload route
 

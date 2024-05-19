@@ -1,0 +1,38 @@
+<%- include('./partials/header') %>
+    <div class="s-container">
+        <h2>Forgot Password</h2>
+        <form action="">
+            <div class="mb-3">
+                <label for="email" class="form-label">Email</label>
+                <input type="email" class="form-control" name="email" id="email" placeholder="example@gmail.com" required>
+            </div>
+            
+            <!-- <input type="file" name="video" accept="video/*" id=""> -->
+            <button type="submit">Submit</button>
+        </form>
+    </div>
+
+    <script>
+        const form = document.querySelector('form');
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            //get form values
+            const email = form.email.value;
+
+            try {
+                const res = await fetch('/forget-password', {
+                    method: 'POST',
+                    body: JSON.stringify({email: email}),
+                    headers: {'Content-Type': 'application/json'}
+                })
+                const data = await res.json()
+                console.log(data)
+            }
+            catch (err) {
+
+            }
+        })
+        
+    </script>
+<%- include('./partials/footer') %>

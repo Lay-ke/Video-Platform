@@ -1,9 +1,10 @@
 const {User, Admin, Video}  = require('../models/user');
 const jwt = require('jsonwebtoken');
-const { S3Client, GetObjectCommand, PutObjectCommand, HeadObjectCommand } = require("@aws-sdk/client-s3");
+const { S3Client, GetObjectCommand, PutObjectCommand, HeadObjectCommand, DeleteObjectCommand } = require("@aws-sdk/client-s3");
 const {getSignedUrl} = require('@aws-sdk/s3-request-presigner');
 const generateUniqueId = require('generate-unique-id');
 const createAWSStream = require('../streamer/index');
+const nodemailer = require('nodemailer');
 require('dotenv').config();
 
 //Handle error
@@ -34,9 +35,11 @@ const handleError = (err) => {
 
 const maxAge = 1 * 24 * 60 * 60;
 
+const jwtSecret = process.env.JWT_SECRET
+
 //jwt function
 const createToken = (id) => {
-    return jwt.sign({id}, 'Amalitech Webby Tokes', {
+    return jwt.sign({id}, jwtSecret, {
         expiresIn: maxAge
     });
 }
@@ -182,8 +185,26 @@ module.exports.video_share = async (req, res) => {
     }
 }
 
-module.exports.video_delete = (req, res) => {
+module.exports.video_delete = async (req, res) => {
+    const Key = req.params.deleteKey;
+    const trashed = await Video.findOneAndDelete({videoKey: Key});
 
+    if (trashed) {
+        const params = {
+            Bucket: BUCKET_NAME,
+            Key: Key
+        };
+        const command = new DeleteObjectCommand(params);
+        await s3.send(command)
+            .then((result) => {
+                res.json({success: 'delete successful'})
+            }).catch((err) => {
+                console.log(err)
+            });
+    } else {
+        res.json('Cannot find to delete video')
+    }
+    
 }
 
 module.exports.home = async (req, res) => {
@@ -277,92 +298,91 @@ module.exports.logout_get = (req, res) => {
 };
 
 module.exports.forget_password_get = (req, res) => {
-
+    res.render('forget_pass', {title: 'Forget Password'});
 }
 
 module.exports.forget_password_post = async (req, res) => {
     const { email } = req.body;
+    console.log(email)
     try {
         const oldUser = await User.findOne({ email });
         if (!oldUser) {
-        return res.json({ status: "User Not Exists!!" });
+            return res.json({ invalid: "User Not Exists!!" });
         }
-        const secret = JWT_SECRET + oldUser.password;
+        const secret = jwtSecret + oldUser.password;
         const token = jwt.sign({ email: oldUser.email, id: oldUser._id }, secret, {
         expiresIn: "5m",
         });
-        const link = `http://localhost:5000/reset-password/${oldUser._id}/${token}`;
+        const link = `http://localhost:3000/reset-password/${oldUser._id}/${token}`;
         var transporter = nodemailer.createTransport({
-        service: "gmail",
-        auth: {
-            user: "adarsh438tcsckandivali@gmail.com",
-            pass: "rmdklolcsmswvyfw",
-        },
+            host: "smtp.ethereal.email",
+            port: 587,
+            secure: false,
+            auth: {
+                user: 'eulalia.windler96@ethereal.email',
+                pass: '4BJEAKwnDSamZuBVYJ'
+            },
         });
         var mailOptions = {
-            from: "youremail@gmail.com",
-            to: "thedebugarena@gmail.com",
+            from: "VideoKAT@gmail.com",
+            to: email,
             subject: "Password Reset",
-            text: link,
+            text: `Click on the link below to reset password \n ${link} \nLink expires in 5 mins`,
           };
       
-          transporter.sendMail(mailOptions, function (error, info) {
+        transporter.sendMail(mailOptions, function (error, info) {
             if (error) {
-              console.log(error);
+                console.log(error);
             } else {
-              console.log("Email sent: " + info.response);
+                console.log("Email sent: " + info.response);
             }
-          });
-          console.log(link);
+        });
+        console.log(link);
+        res.json({success: 'Verified'})
+
     }
     catch (err) {
-
+        console.log(err)
     }
 }
 
 module.exports.reset_password_get = async (req, res) => {
     const { id, token } = req.params;
-  console.log(req.params);
-  const oldUser = await User.findOne({ _id: id });
-  if (!oldUser) {
-    return res.json({ status: "User Not Exists!!" });
-  }
-  const secret = JWT_SECRET + oldUser.password;
-  try {
-    const verify = jwt.verify(token, secret);
-    res.render("index", { email: verify.email, status: "Not Verified" });
-  } catch (error) {
-    console.log(error);
-    res.send("Not Verified");
-  }
+    console.log('Token', req.params)
+    const oldUser = await User.findById( id );
+    console.log(oldUser)
+    if (!oldUser) {
+        return res.send("  status: User Not Exists!! ");
+    }
+    const secret = jwtSecret + oldUser.password;
+    try {
+        const verify = jwt.verify(token, secret);
+        res.render("reset_pass", { title: 'Reset Password',email: verify.email, status: "Not Verified", uToken: req.params});
+    } catch (error) {
+        console.log(error);
+        res.send("Not Verified");
+    }
 }
 
 module.exports.reset_password_post = async (req, res) => {
     const { id, token } = req.params;
     const { password } = req.body;
 
-    const oldUser = await User.findOne({ _id: id });
+    const oldUser = await User.findById(id);
+    console.log(oldUser)
+
     if (!oldUser) {
         return res.json({ status: "User Not Exists!!" });
     }
-    const secret = JWT_SECRET + oldUser.password;
+    const secret = jwtSecret + oldUser.password;
     try {
         const verify = jwt.verify(token, secret);
-        const encryptedPassword = await bcrypt.hash(password, 10);
-        await User.updateOne(
-        {
-            _id: id,
-        },
-        {
-            $set: {
-            password: encryptedPassword,
-            },
-        }
-        );
+        const newPassword = await User.resetPassword(password);
+        const result = User.updateOne({_id: id}, {password: newPassword})
 
-        res.render("index", { email: verify.email, status: "verified" });
-    } catch (error) {
-        console.log(error);
-        res.json({ status: "Something Went Wrong" });
+        res.json({ email: verify.email, success: "verified" });
+    } catch (err) {
+        console.log(err);
+        res.json({ error: "Something Went Wrong" });
     }
 }

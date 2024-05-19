@@ -39,7 +39,7 @@
           for (const video of data.videos) {    // Looping to get each video object
             videos.push(video)
           };
- 
+
           displayCurrentVideo();
           prevBtn.disabled = true; // Disable prev button initially since we're at the first video
         } else {
@@ -52,7 +52,7 @@
 
     // Function to display current video
     function displayCurrentVideo() {
-      const currentVideo = videos[currentVideoIndex];     //Retrieving object based on the currentVideoIndex
+      const currentVideo = videos[currentVideoIndex];     // Retrieving object based on the currentVideoIndex
       videoPlayer.src = `/stream/${currentVideo.videoKey}`;
       videoPlayer.load();    // Reload the video element to reflect the new source
       videoDescription.textContent = currentVideo.description;
@@ -65,11 +65,9 @@
     function nextVideo() {
       if (currentVideoIndex < videos.length - 1) {
         currentVideoIndex++;
-        displayCurrentVideo();
-        prevBtn.disabled = false; // Enable prev button since we're not at the beginning
-      }
-      if (currentVideoIndex === videos.length - 1) {
-        nextBtn.disabled = true; // Disable next button when we reach the last video
+        const nextVideo = videos[currentVideoIndex];
+        const nextUrl = `video.html?videoKey=${nextVideo.videoKey}&title=${encodeURIComponent(nextVideo.title)}&description=${encodeURIComponent(nextVideo.description)}`;
+        window.location.href = nextUrl; // Navigate to the new page with query parameters
       }
     }
 
@@ -77,11 +75,9 @@
     function prevVideo() {
       if (currentVideoIndex > 0) {
         currentVideoIndex--;
-        displayCurrentVideo();
-        nextBtn.disabled = false; // Enable next button since we're not at the end
-      }
-      if (currentVideoIndex === 0) {
-        prevBtn.disabled = true; // Disable prev button when we're at the first video
+        const prevVideo = videos[currentVideoIndex];
+        const prevUrl = `video.html?videoKey=${prevVideo.videoKey}&title=${encodeURIComponent(prevVideo.title)}&description=${encodeURIComponent(prevVideo.description)}`;
+        window.location.href = prevUrl; // Navigate to the new page with query parameters
       }
     }
 
@@ -91,6 +87,68 @@
 
     // Fetch videos when the page loads
     fetchVideos();
+
+    // Function to fetch video URLs from the server
+    // async function fetchVideos() {
+    //   try {
+    //     const response = await fetch('/videos'); // Replace '/videos' with your API endpoint
+    //     if (response.ok) {
+    //       const data = await response.json();
+    //       for (const video of data.videos) {    // Looping to get each video object
+    //         videos.push(video)
+    //       };
+ 
+    //       displayCurrentVideo();
+    //       prevBtn.disabled = true; // Disable prev button initially since we're at the first video
+    //     } else {
+    //       console.error('Failed to fetch videos:', response.statusText);
+    //     }
+    //   } catch (error) {
+    //     console.error('Error fetching videos:', error);
+    //   }
+    // }
+
+    // // Function to display current video
+    // function displayCurrentVideo() {
+    //   const currentVideo = videos[currentVideoIndex];     //Retrieving object based on the currentVideoIndex
+    //   videoPlayer.src = `/stream/${currentVideo.videoKey}`;
+    //   videoPlayer.load();    // Reload the video element to reflect the new source
+    //   videoDescription.textContent = currentVideo.description;
+    //   videoTitle.forEach(element => {
+    //     element.textContent = currentVideo.title; // Update the text content of each element with the class 'video-title'
+    //   });
+    // }
+
+    // // Function to handle next button click
+    // function nextVideo() {
+    //   if (currentVideoIndex < videos.length - 1) {
+    //     currentVideoIndex++;
+    //     displayCurrentVideo();
+    //     prevBtn.disabled = false; // Enable prev button since we're not at the beginning
+    //   }
+    //   if (currentVideoIndex === videos.length - 1) {
+    //     nextBtn.disabled = true; // Disable next button when we reach the last video
+    //   }
+    // }
+
+    // // Function to handle prev button click
+    // function prevVideo() {
+    //   if (currentVideoIndex > 0) {
+    //     currentVideoIndex--;
+    //     displayCurrentVideo();
+    //     nextBtn.disabled = false; // Enable next button since we're not at the end
+    //   }
+    //   if (currentVideoIndex === 0) {
+    //     prevBtn.disabled = true; // Disable prev button when we're at the first video
+    //   }
+    // }
+
+    // // Event listeners for next and prev buttons
+    // nextBtn.addEventListener('click', nextVideo);
+    // prevBtn.addEventListener('click', prevVideo);
+
+    // // Fetch videos when the page loads
+    // fetchVideos();
 
   </script>
 <%- include('./partials/footer') %>

@@ -1,5 +1,9 @@
 <%- include('./partials/header') %>
   <%- include('./partials/nav') %>
+  <div id="success-alert" style="display: none;" class="alert alert-success alert-dismissible fade show" role="alert">
+    Success! Item deleted.
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+</div>
   <div class="container">
     <h2>Welcome @Name</h2>
   </div>
@@ -20,7 +24,7 @@
                 <h6>Upload By: <%= video.adminID %></h6>
                 <!-- <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p> -->
                 <a href="/video/player" class="btn btn-primary">Watch</a>
-                <a href="/video/delete" class="btn btn-primary">Delete</a>
+                <a id="trashcan" class="btn btn-primary" data-id= '<%= video.videoKey %>' >Delete</a>
               </div>
             </div>
           </div>
@@ -33,7 +37,24 @@
       
   </div>
       <script>
+          const trashcan = document.getElementById('trashcan');
+          const successAlert = document.getElementById('success-alert');
 
+          trashcan.addEventListener('click', async (e) => {
+            e.preventDefault();
+            console.log(trashcan.dataset.id)
+            
+            const endpoint = `/video/${trashcan.dataset.id}`;
+
+            const res = await fetch(endpoint, {
+              method: 'DELETE'
+            });
+            
+          const data = await res.json();
+          if (data.success) {
+            successAlert.style.display = 'block';
+          }
+          })
       </script>
   
   
