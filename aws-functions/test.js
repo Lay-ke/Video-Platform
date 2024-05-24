@@ -24,7 +24,7 @@ const S3Client = require('./streamvid')
 const videos = [
     {
         _id: '6646ac6b0eb8f4a247caf649',
-        videoKey: '52zr43zj3kpb3snta08u6aczxxyu9k13',
+        videoKey: '52zr43zj3kp3b3snta08u6aczxxyu9k13',
         title: 'Longer Tin',
         description: 'The very tall boy embarked on an adventurous journey strengthening him in all aspects of physique.',
         adminID: '6634da46657868f856063c2b',
@@ -43,9 +43,6 @@ const videos = [
 ]
 
 // console.log(videos.videoKey[1]);
-const result = 'Admin | boy'
-if (result.includes('boy')) {
-    console.log('Yeah it is')
-} else {
-    console.log('Naaa')
-}
+
+const vidIndex = videos.findIndex(video => video.videoKey === '52zr43zj3kpb3snta08u6aczxxyu9k13')
+console.log(vidIndex)

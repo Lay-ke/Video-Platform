@@ -3,6 +3,15 @@ const SmartStream = require('./smart-stream');
 const AWS = require('aws-sdk')
 require('dotenv').config()
 
+AWS.config.update({
+    accessKeyId: process.env.ACCESS_KEY,
+    secretAccessKey: process.env.SECRET_ACCESS_KEY,
+    region: process.env.BUCKET_REGION
+});
+
+// Create S3 service object
+const s3 = new AWS.S3();
+
 async function createAWSStream(Key) {
     return new Promise((resolve, reject) => {
         const bucketParams = {
@@ -11,22 +20,18 @@ async function createAWSStream(Key) {
         };
 
         try {
-            AWS.config.update({
-                accessKeyId: process.env.ACCESS_KEY,
-                secretAccessKey: process.env.SECRET_ACCESS_KEY,
-                region: process.env.BUCKET_REGION
-            });
-
-            // Create S3 service object
-            const s3 = new AWS.S3();
+            
 
             s3.headObject(bucketParams, (error, data) => {
                 if (error) {
                     reject(error);
                     return;
                 }
+                const {ContentLength} = data
+                
                 // getting stream from s3
-                const stream = new SmartStream(bucketParams, s3, data.ContentLength);
+                // const maxLength = end - start + 1;
+                const stream = new SmartStream(bucketParams, s3, ContentLength);
                 // console.log('STREAM HERE >>>>>', stream)
                 resolve(stream);
             });

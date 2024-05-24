@@ -1,38 +1,46 @@
 <%- include('./partials/header') %>
   <%- include('./partials/nav') %>
-  <div class="container">
-    <h2>Welcome @Name</h2>
-  </div>
-  <div class="container">
-    <div>
-      <h3>Recent Uploads</h3>
+  <section>
+    <div class="container">
+      <h2>Welcome @Name</h2>
     </div>
-    <div class="row row-cols-3 row-cols-md-3 g-3">
-      <% if (videos.length > 0) { %>
-        <% videos.forEach(video => { %>
-          <div >
-            <div class="card" style="width: 20rem;">
-              <img src="https://p10grp.com/wp-content/uploads/2020/03/video.png" height="250" class="card-img-top" alt="thumbnail">
-              <hr class="w-4">
-              <div class="card-body">
-                <h5 class="card-title"><%= video.title %></h5>
-                <!-- <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p> -->
-                <a href="/video/player" class="btn btn-primary">Watch</a>
-              </div>
-            </div>
-          </div>
-        <% }) %>
-      <% } else { %>
-       <p>Sorry No Uploads yet :(  </p>
-      <% } %>
+    <div class="container content">
+        <h1>Welcome to VideoKAT</h1>
+        <h5>The people's video streamer</h5>
+        <% if (videos.length > 0) { %>
+          <% const video = videos[0]; %>
+          <button type="button" class="btn btn-info s_link"><a href="/video?videoKey=<%= video.videoKey %>">Watch Video</a></button>
+        <% } %>
     </div>
-
-      
-  </div>
+  </section>
       <!-- <video id="vid-Box" width="700" controls autoplay src="/stream"></video> -->
-      <script>
+  <script>
+    const videoButton = document.querySelector('#videoPlayer');
 
-      </script>
+    // Add event listener for click event
+    videoButton.addEventListener('click', async (e) => {
+        e.preventDefault();
+
+        const endpoint = '/videos';
+        try {
+            const res = await fetch(endpoint, {
+                method: 'GET'
+            });
+            if (!res.ok) {
+              console.log('Network error')
+            }
+
+            const data = await res.json();
+            if (data.ok) {
+                console.log(data.videos);
+            }
+        } catch (error) {
+            console.error('There was a problem with the fetch operation:', error);
+        }
+    });
+
+    
+  </script>
   
   
 <%- include('./partials/footer') %>

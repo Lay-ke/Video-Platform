@@ -1,5 +1,6 @@
 const jwt = require('jsonwebtoken');
 
+// authenticating user based on jwt
 const requireAuthUser = (req, res, next) => {
     const token = req.cookies.jwt ;
 
@@ -19,6 +20,7 @@ const requireAuthUser = (req, res, next) => {
     }
 };
 
+// authenticating admin based on jwt
 const requireAuthAdmin = (req, res, next) => {
     const token = req.cookies.jwt;
     if (token) {

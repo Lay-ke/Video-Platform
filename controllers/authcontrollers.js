@@ -4,6 +4,7 @@ const { S3Client, GetObjectCommand, PutObjectCommand, HeadObjectCommand, DeleteO
 const {getSignedUrl} = require('@aws-sdk/s3-request-presigner');
 const generateUniqueId = require('generate-unique-id');
 const createAWSStream = require('../streamer/index');
+const {createToken, currentAdmin, sendMail} = require('../services/authService')
 const nodemailer = require('nodemailer');
 require('dotenv').config();
 
@@ -38,11 +39,11 @@ const maxAge = 1 * 24 * 60 * 60;
 const jwtSecret = process.env.JWT_SECRET
 
 //jwt function
-const createToken = (id) => {
-    return jwt.sign({id}, jwtSecret, {
-        expiresIn: maxAge
-    });
-}
+// const createToken = (id) => {
+//     return jwt.sign({id}, jwtSecret, {
+//         expiresIn: maxAge
+//     });
+// }
 
 const getVideos = async () => {
     const videos = await Video.find().sort({uploadDate: -1});
@@ -61,13 +62,13 @@ const getVideos = async () => {
 }
 
 // check current admin
-const currentAdmin = (token) => {
-    try {
-        const decodedToken = jwt.verify(token, 'Amalitech Webby Tokes');
-        return decodedToken;
-    } catch (error) {
-    }
-};
+// const currentAdmin = (token) => {
+//     try {
+//         const decodedToken = jwt.verify(token, 'Amalitech Webby Tokes');
+//         return decodedToken;
+//     } catch (error) {
+//     }
+// };
 
 // setting aws credentials
 const BUCKET_NAME = process.env.BUCKET_NAME;
@@ -127,7 +128,20 @@ module.exports.videos_get = async (req, res) =>{
 }
 
 module.exports.video_player_get = async (req, res) => {
-    res.render('videoplayer', {title: 'Player'});
+    const {videoKey} = req.query;
+    // console.log('Key',videoKey);
+    try {
+        const video = await Video.findOne({videoKey: videoKey});
+        if (!video) {
+            res.send('Video Unavailable');
+        }
+        const videos = await getVideos();    
+
+        res.render('videoplayer', {title: 'Player', video: video, videos: videos},);
+    } catch (err) {
+        res.send('Video Unavailable');
+        console.log(err)
+    };        
 };
 
 module.exports.video_post = async (req, res) => {
@@ -174,16 +188,16 @@ module.exports.video_post = async (req, res) => {
     }
 };
 
-module.exports.video_share = async (req, res) => {
-    const videoKey = req.params.videoKey;
-    try {
-        const video = await Video.findOne({videoKey: videoKey});
-        res.render('videoshare', {title: 'Video', video: video})
-    } catch (err) {
-        res.render('_404.ejs')
-        console.log(err)
-    }
-}
+// module.exports.video_share = async (req, res) => {
+//     const videoKey = req.params.videoKey;
+//     try {
+//         const video = await Video.findOne({videoKey: videoKey});
+//         res.render('videoshare', {title: 'Video', video: video})
+//     } catch (err) {
+//         res.render('_404.ejs')
+//         console.log(err)
+//     };
+// };
 
 module.exports.video_delete = async (req, res) => {
     const Key = req.params.deleteKey;
@@ -203,13 +217,12 @@ module.exports.video_delete = async (req, res) => {
             });
     } else {
         res.json('Cannot find to delete video')
-    }
+    };
     
-}
+};
 
 module.exports.home = async (req, res) => {
     const videos = await getVideos();
-    // console.log(videos)
     res.render('Home', {title: "Home",videos: videos});
 };
 
@@ -252,7 +265,7 @@ module.exports.signin_post = async (req, res) => {
         const errors = handleError(err);
         console.log(errors)
         res.status(400).json({errors});
-    }
+    };
 };
 
 module.exports.admin_home_get = async (req, res) => {
@@ -261,13 +274,13 @@ module.exports.admin_home_get = async (req, res) => {
 };
 
 module.exports.admin_upload_get = (req, res) => {
-    res.render('admin-upload', {title: 'Admin | Upload'})
-}
+    res.render('admin-upload', {title: 'Admin | Upload'});
+};
 
 module.exports.admin_signin_get = async (req, res) => {
     // const email = 'admin@gmail.com';
     // const password = 'qwerty123';
-    res.render('admin-signin', {title: "Admin | SignIn"})
+    res.render('admin-signin', {title: "Admin | SignIn"});
 };
 
 module.exports.admin_signin_post = async (req, res) => {
@@ -280,11 +293,11 @@ module.exports.admin_signin_post = async (req, res) => {
         res.cookie('jwt', token, {maxAge: maxAge * 1000, httpOnly: true});
         res.status(200).json({"admin": admin._id});
     } catch (err) {
-        console.log(err.message)
+        console.log(err.message);
         const errors = handleError(err);
         // console.log(errors)
         res.status(400).json({errors});
-    }
+    };
 };
 
 module.exports.admin_logout_get =(req, res) => {
@@ -313,32 +326,34 @@ module.exports.forget_password_post = async (req, res) => {
         const token = jwt.sign({ email: oldUser.email, id: oldUser._id }, secret, {
         expiresIn: "5m",
         });
-        const link = `http://localhost:3000/reset-password/${oldUser._id}/${token}`;
-        var transporter = nodemailer.createTransport({
-            host: "smtp.ethereal.email",
-            port: 587,
-            secure: false,
-            auth: {
-                user: 'eulalia.windler96@ethereal.email',
-                pass: '4BJEAKwnDSamZuBVYJ'
-            },
-        });
-        var mailOptions = {
-            from: "VideoKAT@gmail.com",
-            to: email,
-            subject: "Password Reset",
-            text: `Click on the link below to reset password \n ${link} \nLink expires in 5 mins`,
-          };
+        const link = `http://localhost:3000/reset-password?id=${oldUser._id}&tok=${token}`;
+        const mail = sendMail(email, link);   //function to send email to user
+        // var transporter = nodemailer.createTransport({
+        //     host: "smtp.ethereal.email",
+        //     port: 587,
+        //     secure: false,
+        //     auth: {
+        //         user: 'eulalia.windler96@ethereal.email',
+        //         pass: '4BJEAKwnDSamZuBVYJ'
+        //     },
+        // });
+        // var mailOptions = {
+        //     from: "VideoKAT@gmail.com",
+        //     to: email,
+        //     subject: "Password Reset",
+        //     text: `Click on the link below to reset password \n ${link} \nLink expires in 5 mins`,
+        //   };
       
-        transporter.sendMail(mailOptions, function (error, info) {
-            if (error) {
-                console.log(error);
-            } else {
-                console.log("Email sent: " + info.response);
-            }
-        });
+        // transporter.sendMail(mailOptions, function (error, info) {
+        //     if (error) {
+        //         console.log(error);
+        //     } else {
+        //         console.log("Email sent: " + info.response);
+        //     }
+        // });
+        console.log('Mail response', mail);
         console.log(link);
-        res.json({success: 'Verified'})
+        res.json({success: 'Verified'});
 
     }
     catch (err) {
@@ -347,17 +362,17 @@ module.exports.forget_password_post = async (req, res) => {
 }
 
 module.exports.reset_password_get = async (req, res) => {
-    const { id, token } = req.params;
-    console.log('Token', req.params)
-    const oldUser = await User.findById( id );
-    console.log(oldUser)
-    if (!oldUser) {
-        return res.send("  status: User Not Exists!! ");
-    }
-    const secret = jwtSecret + oldUser.password;
+    const { id, tok } = req.query;
+    // console.log('Token', req.query)
     try {
-        const verify = jwt.verify(token, secret);
-        res.render("reset_pass", { title: 'Reset Password',email: verify.email, status: "Not Verified", uToken: req.params});
+        const oldUser = await User.findById( id );
+        // console.log(oldUser)
+        if (!oldUser) {
+            return res.send("  status: User Not Exists!! ");
+        }
+        const secret = jwtSecret + oldUser.password;
+        const verify = jwt.verify(tok, secret);
+        res.render("reset_pass", { title: 'Reset Password',email: verify.email, status: "Not Verified", uToken: req.query});
     } catch (error) {
         console.log(error);
         res.send("Not Verified");
@@ -365,7 +380,7 @@ module.exports.reset_password_get = async (req, res) => {
 }
 
 module.exports.reset_password_post = async (req, res) => {
-    const { id, token } = req.params;
+    const { id, tok } = req.query;
     const { password } = req.body;
 
     const oldUser = await User.findById(id);
@@ -376,9 +391,9 @@ module.exports.reset_password_post = async (req, res) => {
     }
     const secret = jwtSecret + oldUser.password;
     try {
-        const verify = jwt.verify(token, secret);
+        const verify = jwt.verify(tok, secret);
         const newPassword = await User.resetPassword(password);
-        const result = User.updateOne({_id: id}, {password: newPassword})
+        const result = await User.updateOne({_id: id}, {password: newPassword})
 
         res.json({ email: verify.email, success: "verified" });
     } catch (err) {

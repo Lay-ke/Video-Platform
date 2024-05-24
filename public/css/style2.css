@@ -1,8 +1,9 @@
 body {
     font-family: Arial, sans-serif;
-    background-color: #f4f4f4;
+    background-color: #705858;
     margin: 0;
     padding: 0;
+    height: 100%;
 }
 
 .s-container {
@@ -47,5 +48,45 @@ button {
 }
 
 button:hover {
-    background-color: #0056b3;
+    background-color: #e47e7e;
+}
+
+.wrapper {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+  }
+
+.nav_color {
+    width: 100%;
+    position: fixed;
+    top: 0;
+    left: 0;
+    background-color: #ffffff;
+    z-index: 99;
+  }
+
+.nav__content {
+    max-width: 1200px;
+    margin: auto;
+    padding: 1rem 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+.content {
+    margin-top: 5em;
+    text-align: center;
+}
+
+.s_link {
+    margin-top: 3em;
+    width: 40%;
+}
+
+.footer {
+    background-color: #f1f1f1;
+    padding: 10px;
+    text-align: center;
 }

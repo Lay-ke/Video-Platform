@@ -1,4 +1,12 @@
 <%- include('./partials/header') %>
+    <div id="success-alert" style="display: none;" class="alert alert-success alert-dismissible fade show" role="alert">
+        Submitted successfully! Check email to reset password 
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    <div id="error-alert" style="display: none;" class="alert alert-danger alert-dismissible fade show" role="alert">
+        Invalid Email!
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
     <div class="s-container">
         <h2>Forgot Password</h2>
         <form action="">
@@ -14,6 +22,9 @@
 
     <script>
         const form = document.querySelector('form');
+        const successAlert = document.getElementById('success-alert');
+        const errorAlert = document.getElementById('error-alert');
+
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
 
@@ -28,9 +39,16 @@
                 })
                 const data = await res.json()
                 console.log(data)
+                if (data.success) {
+                    successAlert.style.display = 'block';
+                }
+                if (data.invalid) {
+                    
+                    errorAlert.style.display = 'block';
+                }
             }
             catch (err) {
-
+                
             }
         })
         
