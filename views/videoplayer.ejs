@@ -78,8 +78,8 @@
 
 
     // Disable buttons if at the boundaries
-    document.getElementById('prev-btn').disabled = currentVideoIndex === 0;
-    document.getElementById('next-btn').disabled = currentVideoIndex === videos.length - 1;
+    document.getElementById('prev-btn').hidden = currentVideoIndex === 0;
+    document.getElementById('next-btn').hidden = currentVideoIndex === videos.length - 1;
 
   </script>
 <%- include('./partials/footer') %>
