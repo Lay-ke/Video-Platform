@@ -1,4 +1,11 @@
 const nodemailer = require('nodemailer');
+const jwt = require('jsonwebtoken');
+require('dotenv').config();
+
+
+const maxAge = 1 * 24 * 60 * 60;
+
+const jwtSecret = process.env.JWT_SECRET
 
 const createToken = (id) => {
     return jwt.sign({id}, jwtSecret, {
@@ -9,7 +16,7 @@ const createToken = (id) => {
 // check current admin
 const currentAdmin = (token) => {
     try {
-        const decodedToken = jwt.verify(token, 'Amalitech Webby Tokes');
+        const decodedToken = jwt.verify(token, jwtSecret);
         return decodedToken;
     } catch (error) {
         return error

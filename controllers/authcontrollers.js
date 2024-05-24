@@ -38,12 +38,6 @@ const maxAge = 1 * 24 * 60 * 60;
 
 const jwtSecret = process.env.JWT_SECRET
 
-//jwt function
-// const createToken = (id) => {
-//     return jwt.sign({id}, jwtSecret, {
-//         expiresIn: maxAge
-//     });
-// }
 
 const getVideos = async () => {
     const videos = await Video.find().sort({uploadDate: -1});
@@ -253,17 +247,18 @@ module.exports.signup_post = async (req, res) => {
 module.exports.signin_post = async (req, res) => {
     const email = req.body.email
     const password = req.body.password
-
+    console.log('signin ', req.body)
     try {
         //authentication using static function
         const user = await User.signin(email, password);
-        const token = createToken(user._id); //creating token
+        const token = await createToken(user._id); //creating token
+        console.log('Hereee',token)
         res.cookie('jwt', token, {httpOnly: true, maxAge: maxAge * 1000 });  //setting jwt cookie
         res.status(200).json({"user": user._id});
     } catch (err) {
-        console.log(err.message);
+        console.log(err);
         const errors = handleError(err);
-        console.log(errors)
+        console.log('Error here',errors)
         res.status(400).json({errors});
     };
 };
@@ -307,6 +302,7 @@ module.exports.admin_logout_get =(req, res) => {
 
 module.exports.logout_get = (req, res) => {
     res.cookie('jwt', '', {maxAge: 1, httpOnly: true});
+    res.locals.usr = ''
     res.redirect('/signin');
 };
 
