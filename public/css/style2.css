@@ -51,6 +51,10 @@ button:hover {
     background-color: #e47e7e;
 }
 
+.hidden {
+    display: none;
+}
+
 .wrapper {
     display: flex;
     flex-direction: column;

@@ -13,8 +13,13 @@
         <h5 class="card-title video-title"><%= video.title %></h5>
         <h6 class="card-subtitle mb-2 text-muted">Description</h6>
         <p id="video-description" class="card-text"><%= video.description %></p>
-        <a href="#" class="card-link">Share</a>
-        <a href="<%= video.url %>" class="card-link">Download</a>
+        <div>
+          <button id="shareButton" class="btn ">Share</button>
+          <div id="linkContainer" class="hidden">
+            <p>link: <span id="linkText">http://localhost:3000/video?videoKey=<%= video.videoKey %></span></p>
+          </div>
+          <!-- <button id="copyButton" class="btn">Copy Link</button> -->
+        </div>
       </div>
     </div>
     <button id="prev-btn">Previous</button>
@@ -41,6 +46,31 @@
       const nextUrl = `/video?videoKey=${video.videoKey}`;
       window.location.href = nextUrl;
     }
+
+    document.getElementById('shareButton').addEventListener('click', function() {
+      var linkContainer = document.getElementById('linkContainer');
+      linkContainer.classList.remove('hidden');
+      var linkText = document.getElementById('linkText').innerText;
+
+      // navigator.clipboard.writeText(linkText).then(function() {
+      //     console.log('Link copied to clipboard');
+      // }, function(err) {
+      //     console.error('Could not copy text: ', err);
+      // });
+
+      // Stop propagation to prevent the document click handler from hiding the container immediately
+      event.stopPropagation();
+    });
+
+    document.addEventListener('click', function(event) {
+      var linkContainer = document.getElementById('linkContainer');
+      var copyButton = document.getElementById('shareButton');
+      
+      // Check if the click was outside the linkContainer and the copyButton
+      if (!linkContainer.contains(event.target) && !copyButton.contains(event.target)) {
+          linkContainer.classList.add('hidden');
+      }
+    });
 
     // Add event listeners for the buttons
     document.getElementById('prev-btn').addEventListener('click', () => navigateVideo(-1));
