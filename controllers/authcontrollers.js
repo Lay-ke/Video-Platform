@@ -75,12 +75,6 @@ const s3 = new S3Client({
     region: BUCKET_REGION
 });
 
-const getObjectFileSize = async (Key) => {
-    const command = new HeadObjectCommand({Key, Bucket: BUCKET_NAME})
-    const response = await s3.send(command)
-    const {ContentLength} = response
-    return ContentLength
-  };
 
 module.exports.stream_get = async (req, res) => {
     const Key = req.params.streamKey;
@@ -129,13 +123,13 @@ module.exports.stream_get = async (req, res) => {
     } catch (error) {
         console.log('Stream error', error )
     }
-}
+};
 
 module.exports.videos_get = async (req, res) =>{
     const videos = await getVideos();
 
     res.json({videos: videos});
-}
+};
 
 module.exports.video_player_get = async (req, res) => {
     const {videoKey} = req.query;
