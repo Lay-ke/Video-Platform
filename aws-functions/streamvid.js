@@ -42,3 +42,39 @@ module.exports = {
   }
 };
 
+// async function createAWSStream(Key, start, end) {
+//     return new Promise((resolve, reject) => {
+//         const bucketParams = {
+//             Bucket: process.env.BUCKET_NAME,
+//             Key: Key,
+//         };
+
+//         try {
+            
+
+//             s3.headObject(bucketParams, (error, data) => {
+//                 if (error) {
+//                     reject(error);
+//                     return;
+//                 }
+//                 const {ContentLength} = data
+                
+                
+//                 const stream = new SmartStream(bucketParams, s3, ContentLength);
+//                 // console.log('STREAM HERE >>>>>', stream)
+//                 resolve(stream);
+//             });
+//         } catch (error) {
+//             reject(error);
+//         }
+//     });
+// }
+
+// // createAWSStream()
+// //     .then((result) => {
+// //         console.log('Result Here >>>>>>>>>',result)
+// //     }).catch((err) => {
+// //         console.log('Error>>', err)
+// //     });
+
+// module.exports = createAWSStream;

@@ -1,5 +1,3 @@
-const { S3Client } = require('@aws-sdk/client-s3');
-const SmartStream = require('./smart-stream');
 const AWS = require('aws-sdk')
 require('dotenv').config()
 
@@ -12,40 +10,30 @@ AWS.config.update({
 // Create S3 service object
 const s3 = new AWS.S3();
 
-async function createAWSStream(Key) {
-    return new Promise((resolve, reject) => {
-        const bucketParams = {
-            Bucket: process.env.BUCKET_NAME,
-            Key: Key
-        };
+const videoBuffers = {};
 
-        try {
-            
+async function fetchVideoFromS3(key) {
+  if (videoBuffers[key]) {
+    console.log(`Video "${key}" already loaded in buffer`);
+    return videoBuffers[key];
+  }
 
-            s3.headObject(bucketParams, (error, data) => {
-                if (error) {
-                    reject(error);
-                    return;
-                }
-                const {ContentLength} = data
-                
-                // getting stream from s3
-                // const maxLength = end - start + 1;
-                const stream = new SmartStream(bucketParams, s3, ContentLength);
-                // console.log('STREAM HERE >>>>>', stream)
-                resolve(stream);
-            });
-        } catch (error) {
-            reject(error);
-        }
-    });
+  const params = {
+    Bucket: process.env.BUCKET_NAME,
+    Key: key,
+  };
+
+  try {
+    const data = await s3.getObject(params).promise();
+    videoBuffers[key] = data.Body;
+    console.log(`Video "${key}" loaded into memory`);
+    console.log('Buffers: ', videoBuffers)
+    return videoBuffers[key];
+  } catch (err) {
+    console.error(`Error fetching video "${key}" from S3:`, err);
+    throw err; // Propagate the error
+  }
 }
-
-// createAWSStream()
-//     .then((result) => {
-//         console.log('Result Here >>>>>>>>>',result)
-//     }).catch((err) => {
-//         console.log('Error>>', err)
-//     });
-
-module.exports = createAWSStream;
+  
+  
+  module.exports = { fetchVideoFromS3 };

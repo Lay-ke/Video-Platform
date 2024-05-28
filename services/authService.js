@@ -5,7 +5,7 @@ require('dotenv').config();
 
 const maxAge = 1 * 24 * 60 * 60;
 
-const jwtSecret = process.env.JWT_SECRET
+const jwtSecret = process.env.JWT_SECRET;
 
 const createToken = (id) => {
     return jwt.sign({id}, jwtSecret, {

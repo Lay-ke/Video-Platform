@@ -22,27 +22,27 @@ const requireAuthUser = (req, res, next) => {
     }
 };
 
-// const checkUser = (req, res, next) => {
-//     const token = req.cookies.jwt ;
+const checkUser = (req, res, next) => {
+    const token = req.cookies.jwt ;
 
-//     //checking request path 
-//     if (token) {
-//         jwt.verify(token, 'Amalitech Webby Tokes', async (err, decodedToken) => {
-//             if (err) {
-//                 console.log(err);
-//                 res.redirect('/signin')
-//             } else {
-//                 // console.log(decodedToken);
-//                 const user = await User.findById(decodedToken.id);
-//                 res.locals.usr = user.email;
-//                 next();
+    //checking request path 
+    if (token) {
+        jwt.verify(token, 'Amalitech Webby Tokes', async (err, decodedToken) => {
+            if (err) {
+                console.log(err);
+                res.redirect('/signin')
+            } else {
+                // console.log(decodedToken);
+                const user = await User.findById(decodedToken.id);
+                res.locals.usr = user.email;
+                next();
 
-//             }
-//         })
-//     } else {
-//         res.redirect('/signin')
-//     }
-// }
+            }
+        })
+    } else {
+        res.redirect('/signin')
+    }
+}
 
 // authenticating admin based on jwt
 const requireAuthAdmin = (req, res, next) => {
@@ -62,4 +62,26 @@ const requireAuthAdmin = (req, res, next) => {
     }
 };
 
-module.exports = {requireAuthUser, requireAuthAdmin};
+const checkAdmin = (req, res, next) => {
+    const token = req.cookies.jwt ;
+
+    //checking request path 
+    if (token) {
+        jwt.verify(token, 'Amalitech Webby Tokes', async (err, decodedToken) => {
+            if (err) {
+                console.log(err);
+                res.redirect('/admin-signin')
+            } else {
+                // console.log(decodedToken);
+                const admin = await User.findById(decodedToken.id);
+                res.locals.adm = admin.email;
+                next();
+
+            }
+        })
+    } else {
+        res.redirect('/signin')
+    }
+}
+
+module.exports = {requireAuthUser, requireAuthAdmin, checkUser, checkAdmin};

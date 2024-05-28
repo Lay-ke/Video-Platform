@@ -3,9 +3,8 @@ const jwt = require('jsonwebtoken');
 const { S3Client, GetObjectCommand, PutObjectCommand, HeadObjectCommand, DeleteObjectCommand } = require("@aws-sdk/client-s3");
 const {getSignedUrl} = require('@aws-sdk/s3-request-presigner');
 const generateUniqueId = require('generate-unique-id');
-const createAWSStream = require('../streamer/index');
-const {createToken, currentAdmin, sendMail} = require('../services/authService')
-const nodemailer = require('nodemailer');
+const {fetchVideoFromS3} = require('../streamer/index');
+const {createToken, currentAdmin, sendMail} = require('../services/authService');
 require('dotenv').config();
 
 //Handle error
@@ -35,9 +34,7 @@ const handleError = (err) => {
 };
 
 const maxAge = 1 * 24 * 60 * 60;
-
-const jwtSecret = process.env.JWT_SECRET
-
+const jwtSecret = process.env.JWT_SECRET;
 
 const getVideos = async () => {
     const videos = await Video.find().sort({uploadDate: -1});
@@ -87,32 +84,51 @@ const getObjectFileSize = async (Key) => {
 
 module.exports.stream_get = async (req, res) => {
     const Key = req.params.streamKey;
+    
+    let videoBuffer;
+
+    try {
+      videoBuffer = await fetchVideoFromS3(Key);
+    } catch (err) {
+      res.writeHead(500, { 'Content-Type': 'text/plain' });
+      res.end('Failed to load video');
+      return;
+    }
+
     const range = req.headers.range;
-    console.log('>>>>>>>>>>>>>>',range)
     if (!range) {
-        res.status(400).send("Request Range header")
-    }
-    
-    const videoSize = await getObjectFileSize(Key);
-    
-
-    const chunkSize = videoSize;
-    const start = Number(range.replace(/\D/g, ''));
-    const end = Math.min(start + chunkSize, videoSize - 1);
-
-    const contentLength = end - start + 1;
-    const headers = {
-        "Content-Range": `bytes ${start}- ${end}/${videoSize}`,
-        "Accept-Ranges": 'bytes',
-        "Content-Length": contentLength,
-        "Content-Type": 'video/mp4'
+      res.writeHead(416, { 'Content-Type': 'text/plain' });
+      res.end('Range not specified');
+      return;
     }
 
-    res.writeHead(206,headers);
-    
-    const stream = await createAWSStream(Key)
+    const positions = range.replace(/bytes=/, '').split('-');
+    const start = parseInt(positions[0], 10);
+    const end = positions[1] ? parseInt(positions[1], 10) : videoBuffer.length - 1;
+    console.log('Start: ',start,'\nEnd: ',end, '\nvideoLength: ',videoBuffer.length )
 
-    stream.pipe(res)
+
+    if (start >= videoBuffer.length || end >= videoBuffer.length) {
+      res.writeHead(416, { 'Content-Range': `bytes */${videoBuffer.length}` });
+      res.end();
+      return;
+    }
+
+    const chunkSize = (end - start) + 1;
+    console.log('ChunkSize: ', chunkSize)
+    const head = {
+      'Content-Range': `bytes ${start}-${end}/${videoBuffer.length}`,
+      'Accept-Ranges': 'bytes',
+      'Content-Length': chunkSize,
+      'Content-Type': 'video/mp4',
+    };
+    try {
+        res.writeHead(206, head);
+        res.end(videoBuffer.slice(start, end + 1));
+
+    } catch (error) {
+        console.log('Stream error', error )
+    }
 }
 
 module.exports.videos_get = async (req, res) =>{
@@ -216,7 +232,7 @@ module.exports.video_delete = async (req, res) => {
 };
 
 module.exports.home = async (req, res) => {
-    const videos = await getVideos();
+    const videos = await getVideos(); 
     res.render('Home', {title: "Home",videos: videos});
 };
 
@@ -246,13 +262,12 @@ module.exports.signup_post = async (req, res) => {
 
 module.exports.signin_post = async (req, res) => {
     const email = req.body.email
-    const password = req.body.password
-    console.log('signin ', req.body)
+    const password = req.body.password;
+
     try {
         //authentication using static function
         const user = await User.signin(email, password);
         const token = await createToken(user._id); //creating token
-        console.log('Hereee',token)
         res.cookie('jwt', token, {httpOnly: true, maxAge: maxAge * 1000 });  //setting jwt cookie
         res.status(200).json({"user": user._id});
     } catch (err) {
@@ -302,13 +317,13 @@ module.exports.admin_logout_get =(req, res) => {
 
 module.exports.logout_get = (req, res) => {
     res.cookie('jwt', '', {maxAge: 1, httpOnly: true});
-    res.locals.usr = ''
+    res.locals.usr = null;
     res.redirect('/signin');
 };
 
 module.exports.forget_password_get = (req, res) => {
     res.render('forget_pass', {title: 'Forget Password'});
-}
+};
 
 module.exports.forget_password_post = async (req, res) => {
     const { email } = req.body;
@@ -324,38 +339,16 @@ module.exports.forget_password_post = async (req, res) => {
         });
         const link = `http://localhost:3000/reset-password?id=${oldUser._id}&tok=${token}`;
         const mail = sendMail(email, link);   //function to send email to user
-        // var transporter = nodemailer.createTransport({
-        //     host: "smtp.ethereal.email",
-        //     port: 587,
-        //     secure: false,
-        //     auth: {
-        //         user: 'eulalia.windler96@ethereal.email',
-        //         pass: '4BJEAKwnDSamZuBVYJ'
-        //     },
-        // });
-        // var mailOptions = {
-        //     from: "VideoKAT@gmail.com",
-        //     to: email,
-        //     subject: "Password Reset",
-        //     text: `Click on the link below to reset password \n ${link} \nLink expires in 5 mins`,
-        //   };
-      
-        // transporter.sendMail(mailOptions, function (error, info) {
-        //     if (error) {
-        //         console.log(error);
-        //     } else {
-        //         console.log("Email sent: " + info.response);
-        //     }
-        // });
+
         console.log('Mail response', mail);
         console.log(link);
         res.json({success: 'Verified'});
 
     }
     catch (err) {
-        console.log(err)
+        console.log(err);
     }
-}
+};
 
 module.exports.reset_password_get = async (req, res) => {
     const { id, tok } = req.query;
@@ -373,7 +366,7 @@ module.exports.reset_password_get = async (req, res) => {
         console.log(error);
         res.send("Not Verified");
     }
-}
+};
 
 module.exports.reset_password_post = async (req, res) => {
     const { id, tok } = req.query;
@@ -389,7 +382,7 @@ module.exports.reset_password_post = async (req, res) => {
     try {
         const verify = jwt.verify(tok, secret);
         const newPassword = await User.resetPassword(password);
-        const result = await User.updateOne({_id: id}, {password: newPassword})
+        const result = await User.updateOne({_id: id}, {password: newPassword});  // updating user's new password
 
         res.json({ email: verify.email, success: "verified" });
     } catch (err) {
