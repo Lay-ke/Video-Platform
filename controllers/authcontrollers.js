@@ -3,7 +3,7 @@ const jwt = require('jsonwebtoken');
 const { S3Client, GetObjectCommand, PutObjectCommand, HeadObjectCommand, DeleteObjectCommand } = require("@aws-sdk/client-s3");
 const {getSignedUrl} = require('@aws-sdk/s3-request-presigner');
 const generateUniqueId = require('generate-unique-id');
-const {fetchVideoFromS3} = require('../streamer/index');
+const {fetchVideoFromS3} = require('../streamer/smartStream');
 const {createToken, currentAdmin, sendMail} = require('../services/authService');
 require('dotenv').config();
 
@@ -46,8 +46,13 @@ const getVideos = async () => {
             const command = new GetObjectCommand(params);
             const url = await getSignedUrl(s3, command);
             video.url = url;
-            const adminData = await Admin.findById(video.adminID);
-            video.adminID = adminData.email;
+            try {
+                const adminData = await Admin.findById(video.adminID);
+                // console.log(adminData)
+                video.adminID = adminData.email;
+            } catch (err) {
+                console.log(err)
+            }
         }
     return videos;
 }
@@ -75,9 +80,14 @@ const s3 = new S3Client({
     region: BUCKET_REGION
 });
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> views
 module.exports.stream_get = async (req, res) => {
     const Key = req.params.streamKey;
+    const range = req.headers.range;
+    console.log('Range >> ', range);
     
     let videoBuffer;
 
@@ -89,17 +99,17 @@ module.exports.stream_get = async (req, res) => {
       return;
     }
 
-    const range = req.headers.range;
+    
     if (!range) {
       res.writeHead(416, { 'Content-Type': 'text/plain' });
       res.end('Range not specified');
       return;
     }
 
-    const positions = range.replace(/bytes=/, '').split('-');
+    const positions = range.replace(/bytes=/, '').split('-');   // splitting range to derive start and end values
     const start = parseInt(positions[0], 10);
     const end = positions[1] ? parseInt(positions[1], 10) : videoBuffer.length - 1;
-    console.log('Start: ',start,'\nEnd: ',end, '\nvideoLength: ',videoBuffer.length )
+    // console.log('Start: ',start,'\nEnd: ',end, '\nvideoLength: ',videoBuffer.length )
 
 
     if (start >= videoBuffer.length || end >= videoBuffer.length) {

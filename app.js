@@ -28,21 +28,6 @@ mongoose.connect(dbURI)
     .catch((err) => console.log(err))
 
 
-    //serving static files to videoplayer
-    // app.get('/video/css/bootstrap.min.css', function(req, res) {
-    //     res.type('text/css');
-    //     res.sendFile(__dirname + '/public/css/bootstrap.min.css');
-    // });
-
-    // app.get('/video/css/style2.css', function(req, res) {
-    //     res.type('text/css');
-    //     res.sendFile(__dirname + '/public/css/style2.css');
-    // });
-    
-    // app.get('/video/js/bootstrap.bundle.min.js', function(req, res) {
-    //     res.type('text/js');
-    //     res.sendFile(__dirname + '/public/js/bootstrap.bundle.min.js');
-    // });
     //Authentication Routes
     app.use(authRoutes)
 

@@ -5,7 +5,7 @@
       <h3>Now Playing: <%= video.title %></h3>
     </div>
     <div>
-      <video id="video-player" width="700" height="600" controls autoplay  src="/stream/<%= video.videoKey %>"></video>
+      <video id="video-player" width="700" height="400" controls autoplay  src="/stream/<%= video.videoKey %>"></video>
     </div>
     <br>
     <div class="card w-50" style="width: 25rem;">
@@ -22,8 +22,8 @@
         </div>
       </div>
     </div>
-    <button id="prev-btn">Previous</button>
-    <button id="next-btn">Next</button>
+    <button id="prev-btn" class="nav_button">Previous</button>
+    <button id="next-btn" class="nav_button">Next</button>
   </div>
 
   <script>

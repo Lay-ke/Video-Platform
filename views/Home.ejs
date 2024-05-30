@@ -9,7 +9,7 @@
         <h5>The people's video streamer</h5>
         <% if (videos.length > 0) { %>
           <% const video = videos[0]; %>
-          <button type="button" class="btn btn-info s_link"><a href="/video?videoKey=<%= video.videoKey %>">Watch Video</a></button>
+          <a href="/video?videoKey=<%= video.videoKey %>"><button type="button" class="btn btn-info s_link">Watch Video</button></a>
         <% } %>
     </div>
   </section>
