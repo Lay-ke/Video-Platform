@@ -48,7 +48,7 @@ const getVideos = async () => {
             video.url = url;
             try {
                 const adminData = await Admin.findById(video.adminID);
-                console.log(adminData)
+                // console.log(adminData)
                 video.adminID = adminData.email;
             } catch (err) {
                 console.log(err)
