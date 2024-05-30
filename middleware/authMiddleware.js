@@ -33,9 +33,13 @@ const checkUser = (req, res, next) => {
                 res.redirect('/signin')
             } else {
                 // console.log(decodedToken);
-                const user = await User.findById(decodedToken.id);
-                res.locals.usr = user.email;
-                next();
+                try {
+                    const user = await User.findById(decodedToken.id);
+                    res.locals.usr = user.email;
+                    next();
+                } catch (err) {
+                    console.log('checkuser error:', err)
+                }
 
             }
         })
