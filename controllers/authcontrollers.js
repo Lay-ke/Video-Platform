@@ -80,10 +80,6 @@ const s3 = new S3Client({
     region: BUCKET_REGION
 });
 
-<<<<<<< HEAD
-
-=======
->>>>>>> views
 module.exports.stream_get = async (req, res) => {
     const Key = req.params.streamKey;
     const range = req.headers.range;

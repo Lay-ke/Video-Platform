@@ -1,0 +1,22 @@
+<%- include('./partials/header') %>
+  <%- include('./partials/nav') %>
+  <div class="container">
+    <div>
+      <h3>Now Playing: <div><%= video.title %></div></h3>
+    </div>
+    <div>
+      <video id="video-player" width="700" controls autoplay  src="/stream/<%= video.videoKey %>"></video>
+    </div>
+    <br>
+    <div class="card w-50" style="width: 25rem;">
+      <div class="card-body">
+        <h5 class="card-title"><%= video.title %></h5>
+        <h6 class="card-subtitle mb-2 text-muted">Description</h6>
+        <p class="card-text"><%= video.description %></p>
+        <a href="/video-share/<%= video.videoKey %>" class="card-link">Share</a>
+        <a href="#" class="card-link">Download</a>
+      </div>
+    </div>
+    <!-- <button id="prev-btn" disabled>Prev</button>
+    <button id="next-btn">Next</button> -->
+  </div>
