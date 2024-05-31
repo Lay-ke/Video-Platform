@@ -30,7 +30,7 @@ const checkUser = (req, res, next) => {
         jwt.verify(token, 'Amalitech Webby Tokes', async (err, decodedToken) => {
             if (err) {
                 console.log(err);
-                res.redirect('/signin')
+                res.redirect('/signin');
             } else {
                 // console.log(decodedToken);
                 try {
@@ -38,13 +38,14 @@ const checkUser = (req, res, next) => {
                     res.locals.usr = user.email;
                     next();
                 } catch (err) {
-                    console.log('checkuser error:', err)
+                    res.redirect('/signin');
+                    console.log('checkuser error:', err);
                 }
 
             }
         })
     } else {
-        res.redirect('/signin')
+        res.redirect('/signin');
     }
 }
 
@@ -55,14 +56,14 @@ const requireAuthAdmin = (req, res, next) => {
         jwt.verify(token, 'Amalitech Webby Tokes', (err, decodedToken) => {
             if (err) {
                 console.log(err);
-                res.redirect('/admin-signin')
+                res.redirect('/admin-signin');
            } else {
                 // console.log(decodedToken);
                 next();
             }
             })
     } else {
-        res.redirect('/admin-signin')
+        res.redirect('/admin-signin');
     }
 };
 
@@ -74,7 +75,7 @@ const checkAdmin = (req, res, next) => {
         jwt.verify(token, 'Amalitech Webby Tokes', async (err, decodedToken) => {
             if (err) {
                 console.log(err);
-                res.redirect('/admin-signin')
+                res.redirect('/admin-signin');
             } else {
                 // console.log(decodedToken);
                 const admin = await User.findById(decodedToken.id);
