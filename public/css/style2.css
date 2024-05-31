@@ -1,6 +1,7 @@
 body {
     font-family: Arial, sans-serif;
-    background-color: #705858;
+    background-color: #ffffff;
+    color: #5909ae;
     margin: 0;
     padding: 0;
     height: 100%;
@@ -15,8 +16,13 @@ body {
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 }
 
-h2 {
-    text-align: center;
+.s-img {
+    margin-top: 10px;
+    margin-left: 10px;
+}
+
+.u-name {
+    text-align:right;
     margin-bottom: 20px;
 }
 
@@ -40,7 +46,7 @@ input[type="password"] {
 button {
     width: 100%;
     padding: 10px;
-    background-color: #007bff;
+    background-color: #27044b;
     color: #fff;
     border: none;
     border-radius: 3px;
@@ -48,11 +54,20 @@ button {
 }
 
 button:hover {
-    background-color: #cf0000;
+    background-color: #663894;
+}
+
+.s-btn2 {
+    display: flex;
+    background-color: #27044b;
+    margin-top: 30px;
+    width: 30%;
+    justify-content: center;
+    margin-left: 70%;
 }
 
 .nav_button {
-    background-color: #cf0000;
+    background-color: #27044b;
     margin-top: 30px;
     margin-bottom: 60px;
     width: 30%;
@@ -85,7 +100,20 @@ button:hover {
     display: flex;
     align-items: center;
     justify-content: space-between;
+
   }
+
+.txt-color{
+    color: #ffffff;
+}
+
+.txt-color2 {
+    color: #5909ae;
+}
+
+.txt-color3 {
+    color: red;
+}
 
 .content {
     margin-top: 5em;
@@ -95,9 +123,28 @@ button:hover {
 .s_link {
     margin-top: 3em;
     width: 40%;
+    border-radius: 1rem;
+}
+
+.button-container {
+    display: flex;
+    justify-content: space-between; /* Adjust spacing between buttons */
+    align-items: center; /* Align items vertically in the center */
+    width: 100%; /* Adjust the container width as needed */
+  }
+
+.s-btn {
+    width: 120px;
+    background-color: white;
+    color: #5909ae;
+    padding: 10px 20px;
+}
+
+.s-btn:hover {
+    background-color: white;
 }
 
 .footer {
-    background-color: #f1f1f1;
+    background-color: #27044b;
     text-align: center;
 }

@@ -2,14 +2,14 @@
   <%- include('./partials/nav') %>
   <section>
     <div class="container">
-      <h2>Welcome <%= usr%> </h2>
+      <h6 class="u-name">Hello <%= usr%></h6>
     </div>
     <div class="container content">
         <h1>Welcome to VideoKAT</h1>
         <h5>The people's video streamer</h5>
         <% if (videos.length > 0) { %>
           <% const video = videos[0]; %>
-          <a href="/video?videoKey=<%= video.videoKey %>"><button type="button" class="btn btn-info s_link">Watch Video</button></a>
+          <a href="/video?videoKey=<%= video.videoKey %>"><button type="button" class="s_link">Click to Watch Video</button></a>
         <% } %>
     </div>
   </section>
