@@ -1,6 +1,6 @@
 const { Router } = require('express');
 const authController = require('../controllers/authcontrollers')
-const {requireAuthUser, requireAuthAdmin, checkUser} = require('../middleware/authMiddleware')
+const {requireAuthUser, requireAuthAdmin, checkUser, checkAdmin} = require('../middleware/authMiddleware')
 const multer = require('multer');
 
 
@@ -21,8 +21,8 @@ router.get('/video', authController.video_player_get);   // users video player
 // Admin
 router.get('/admin-signin', authController.admin_signin_get);
 router.post('/admin-signin', authController.admin_signin_post);
-router.get('/admin-home',requireAuthAdmin, authController.admin_home_get); //add requireauth
-router.get('/admin-upload', requireAuthAdmin,authController.admin_upload_get);   // admin upload page route
+router.get('/admin-home',[requireAuthAdmin, checkAdmin], authController.admin_home_get); //add requireauth
+router.get('/admin-upload', [requireAuthAdmin, checkAdmin],authController.admin_upload_get);   // admin upload page route
 router.get('/admin/logout', authController.admin_logout_get);
 
 router.delete('/video/:deleteKey', authController.video_delete);

@@ -78,14 +78,19 @@ const checkAdmin = (req, res, next) => {
                 res.redirect('/admin-signin');
             } else {
                 // console.log(decodedToken);
-                const admin = await User.findById(decodedToken.id);
-                res.locals.adm = admin.email;
-                next();
+                try {
+                    const admin = await Admin.findById(decodedToken.id);
+                    res.locals.adm = admin.email;
+                    next();
+                } catch (err) {
+                    res.redirect('/admin-signin');
+                    console.log('checkadmin error:', err);
+                }
 
             }
         })
     } else {
-        res.redirect('/signin')
+        res.redirect('/admin-signin')
     }
 }
 
