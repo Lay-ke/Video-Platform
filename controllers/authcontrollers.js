@@ -4,7 +4,7 @@ const { S3Client, GetObjectCommand, PutObjectCommand, HeadObjectCommand, DeleteO
 const {getSignedUrl} = require('@aws-sdk/s3-request-presigner');
 const generateUniqueId = require('generate-unique-id');
 const {fetchVideoFromS3} = require('../streamer/smartStream');
-const {createToken, currentAdmin, sendMail} = require('../services/authService');
+const {createToken, currentAdmin, pushMail} = require('../services/authService');
 require('dotenv').config();
 
 //Handle error
@@ -57,14 +57,6 @@ const getVideos = async () => {
     return videos;
 }
 
-// check current admin
-// const currentAdmin = (token) => {
-//     try {
-//         const decodedToken = jwt.verify(token, 'Amalitech Webby Tokes');
-//         return decodedToken;
-//     } catch (error) {
-//     }
-// };
 
 // setting aws credentials
 const BUCKET_NAME = process.env.BUCKET_NAME;
@@ -143,13 +135,13 @@ module.exports.video_player_get = async (req, res) => {
     try {
         const video = await Video.findOne({videoKey: videoKey});
         if (!video) {
-            res.send('Video Unavailable');
+            res.render('_404', {title: '404 Page'});
         }
         const videos = await getVideos();    
 
         res.render('videoplayer', {title: 'Player', video: video, videos: videos},);
     } catch (err) {
-        res.send('Video Unavailable');
+        res.render('_404', {title: '404 Page'});
         console.log(err)
     };        
 };
@@ -197,17 +189,6 @@ module.exports.video_post = async (req, res) => {
         res.json({'jwt': 'jwtError'})
     }
 };
-
-// module.exports.video_share = async (req, res) => {
-//     const videoKey = req.params.videoKey;
-//     try {
-//         const video = await Video.findOne({videoKey: videoKey});
-//         res.render('videoshare', {title: 'Video', video: video})
-//     } catch (err) {
-//         res.render('_404.ejs')
-//         console.log(err)
-//     };
-// };
 
 module.exports.video_delete = async (req, res) => {
     const Key = req.params.deleteKey;
@@ -338,12 +319,12 @@ module.exports.forget_password_post = async (req, res) => {
         expiresIn: "5m",
         });
         const link = `http://localhost:3000/reset-password?id=${oldUser._id}&tok=${token}`;
-        const mail = sendMail(email, link);   //function to send email to user
-
-        console.log('Mail response', mail);
-        console.log(link);
-        res.json({success: 'Verified'});
-
+        const mail = await pushMail(email, link);   //function to send email to user
+        if (mail) {
+            console.log('Mail response: ', mail);
+            console.log(link);
+            res.json({success: 'Verified'});
+        };
     }
     catch (err) {
         console.log(err);
@@ -364,7 +345,7 @@ module.exports.reset_password_get = async (req, res) => {
         res.render("reset_pass", { title: 'Reset Password',email: verify.email, status: "Not Verified", uToken: req.query});
     } catch (error) {
         console.log(error);
-        res.send("Not Verified");
+        res.render('_404', {title: '404 Page' });
     }
 };
 

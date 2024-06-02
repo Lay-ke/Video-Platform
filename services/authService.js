@@ -23,31 +23,36 @@ const currentAdmin = (token) => {
     }
 };
 
-const sendMail = (email,link) => {
-    var transporter = nodemailer.createTransport({
-        host: "smtp.ethereal.email",
-        port: 587,
-        secure: false,
-        auth: {
-            user: 'eulalia.windler96@ethereal.email',
-            pass: '4BJEAKwnDSamZuBVYJ'
-        },
-    });
-    var mailOptions = {
-        from: "VideoKAT@gmail.com",
-        to: email,
-        subject: "Password Reset",
-        text: `Click on the link below to reset password \n ${link} \nLink expires in 5 mins`,
-      };
-  
-    transporter.sendMail(mailOptions, function (error, info) {
-        if (error) {
-            return (error);
-        } else {
-            return ("Email sent: " + info.response);
-        }
-    });
+const pushMail = async (email, link) => {
+    try {
+        let transporter = nodemailer.createTransport({
+            host: "smtp.ethereal.email",    // using ethereal SMTP email system
+            port: 587,
+            secure: false,
+            auth: {
+                user: process.env.SMTP_USER,
+                pass: process.env.SMTP_PASS
+            },
+        });
+
+        let mailOptions = {
+            from: "VideoKAT <no-reply@videokat.com>",
+            to: email,
+            subject: "Password Reset",
+            text: `Click on the link below to reset password \n ${link} \nLink expires in 5 mins`,
+            html: `<p>Click on the link below to reset your password:</p>
+                   <p><a href="${link}">${link}</a></p>
+                   <p><strong>Link expires in 5 minutes.</strong></p>`
+        };
+
+        let info = await transporter.sendMail(mailOptions);
+        return info.response;
+
+    } catch (error) {
+        console.log('Email err: ', error);
+        return error;
+    }
 };
 
 
-module.exports = {createToken,currentAdmin,sendMail}
+module.exports = {createToken,currentAdmin,pushMail}
