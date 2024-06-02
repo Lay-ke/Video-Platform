@@ -1,5 +1,4 @@
-# Video-Platform
-NSS Training Project
+
 ## Project Title: Custom Video Hosting Platform for Paul Leonard
 
 ## Project Objective
@@ -63,7 +62,7 @@ A bespoke video hosting platform tailored for Paul Leonard, enabling exclusive b
 #### Phase 2: Backend Development
 - Set up Express.js server and MongoDB database.
 - Implement user authentication (signup, login, account verification, password reset).
-- Create API endpoints for video upload, retrieval, delete and navigation.
+- Create API endpoints for video (upload, retrieval, delete navigation), email service.
 
 #### Phase 3: Frontend Development
 - Design the UI/UX using ejs template.
