@@ -318,7 +318,7 @@ module.exports.forget_password_post = async (req, res) => {
         const token = jwt.sign({ email: oldUser.email, id: oldUser._id }, secret, {
         expiresIn: "5m",
         });
-        const link = `http://localhost:3000/reset-password?id=${oldUser._id}&tok=${token}`;
+        const link = `https://video-platform-du1s.onrender.com/reset-password?id=${oldUser._id}&tok=${token}`;
         const mail = await pushMail(email, link);   //function to send email to user
         if (mail) {
             console.log('Mail response: ', mail);
