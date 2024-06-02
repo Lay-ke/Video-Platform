@@ -389,4 +389,9 @@ module.exports.reset_password_post = async (req, res) => {
         console.log(err);
         res.json({ error: "Something Went Wrong" });
     }
+};
+
+// 404 page
+module.exports._404_page = (req, res) => {
+    res.status(404).render('_404', {title: '404 Page'});
 }

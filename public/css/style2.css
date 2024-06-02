@@ -133,6 +133,10 @@ button:hover {
     width: 100%; /* Adjust the container width as needed */
   }
 
+  ._404 {
+    margin-top: 30px;
+  }
+
 .s-btn {
     width: 120px;
     background-color: white;
