@@ -18,8 +18,6 @@
               <div class="card-body">
                 <h5 class="card-title"><%= video.title %></h5>
                 <h6>Upload By: <%= video.adminID %></h6>
-                <!-- <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p> -->
-                <a href="/video?videoKey=<%= video.videoKey %>" class="btn btn-primary">Watch</a>
                 <a id="trashcan" class="btn btn-primary" data-id= '<%= video.videoKey %>' >Delete</a>
               </div>
             </div>
