@@ -23,7 +23,6 @@ mongoose.connect(dbURI)
     .then((result) => {
         //server is listening
         console.log('DB Connected')
-        app.listen(3000)
     })
     .catch((err) => console.log(err))
 
