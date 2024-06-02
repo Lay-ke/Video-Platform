@@ -269,8 +269,6 @@ module.exports.admin_upload_get = (req, res) => {
 };
 
 module.exports.admin_signin_get = async (req, res) => {
-    // const email = 'admin@gmail.com';
-    // const password = 'qwerty123';
     res.render('admin-signin', {title: "Admin | SignIn"});
 };
 
