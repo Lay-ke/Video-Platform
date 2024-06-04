@@ -62,7 +62,15 @@ A bespoke video hosting platform tailored for Paul Leonard, enabling exclusive b
 #### Phase 2: Backend Development
 - Set up Express.js server and MongoDB database.
 - Implement user authentication (signup, login, account verification, password reset).
-- Create API endpoints for video (upload, retrieval, delete navigation), email service.
+- Create API endpoints for video (upload, retrieval, delete navigation), email service(using ethereal).
+
+##### Routes:
+- /admin-home  (Admin homepage) 
+- /admin-signin   (Admin signin page, admin@gmail.com| qwerty123)
+- /admin-upload   (Admin upload page)
+- /home  (User homepage)
+- /signin   (User signin)
+- /signup   (User signup)
 
 #### Phase 3: Frontend Development
 - Design the UI/UX using ejs template.
