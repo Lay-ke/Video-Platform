@@ -66,7 +66,7 @@ A bespoke video hosting platform tailored for Paul Leonard, enabling exclusive b
 
 ##### Routes:
 - /admin-home  (Admin homepage) 
-- /admin-signin   (Admin signin page, admin@gmail.com| qwerty123)
+- /admin-signin   (Admin signin page)
 - /admin-upload   (Admin upload page)
 - /  (User homepage)
 - /signin   (User signin)
