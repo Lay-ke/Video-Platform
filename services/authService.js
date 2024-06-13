@@ -26,9 +26,7 @@ const currentAdmin = (token) => {
 const pushMail = async (email, link) => {
     try {
         let transporter = nodemailer.createTransport({
-            host: "smtp.ethereal.email",    // using ethereal SMTP email system
-            port: 587,
-            secure: false,
+            service: "gmail",    // using ethereal SMTP email system
             auth: {
                 user: process.env.SMTP_USER,
                 pass: process.env.SMTP_PASS
@@ -41,7 +39,7 @@ const pushMail = async (email, link) => {
             subject: "Password Reset",
             text: `Click on the link below to reset password \n ${link} \nLink expires in 5 mins`,
             html: `<p>Click on the link below to reset your password:</p>
-                   <p><a href="${link}">${link}</a></p>
+                   <p><a href="${link}" target="_blank"> ${link} </a></p>
                    <p><strong>Link expires in 5 minutes.</strong></p>`
         };
 
